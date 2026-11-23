@@ -145,9 +145,16 @@ textarea:focus-visible {
   color: var(--blue);
   border-radius: 50%;
 }
+.maincol {
+  --espaco-lateral: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
 #principal {
+  flex: 1 0 auto;
   width: 100%;
-  padding: 16px 20px 12px;
+  padding: 16px var(--espaco-lateral) 12px;
   min-width: 0;
 }
 .summarystrip {
@@ -569,15 +576,19 @@ textarea:focus-visible {
   min-height: 84px;
 }
 .foot {
-  justify-content: space-between;
-  padding: 18px 0 0;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-inline: var(--espaco-lateral);
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
   color: var(--faint);
   font-size: 12px;
 }
 .foot span {
-  display: flex;
-  gap: 6px;
+  display: inline-flex;
   align-items: center;
+  gap: 7px;
 }
 .workflow {
   padding: 18px;
@@ -927,14 +938,6 @@ textarea,
   width: auto;
   height: auto;
 }
-.app .foot {
-  padding-top: 12px;
-}
-.foot span {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
 .foot i {
   border-radius: 50%;
   width: 3px;
@@ -971,8 +974,11 @@ textarea,
   }
 }
 @media (max-width: 900px) {
+  .maincol {
+    --espaco-lateral: 12px;
+  }
   #principal {
-    padding: 12px;
+    padding-block: 12px;
   }
   .topbar {
     padding: 0 12px;
@@ -1030,8 +1036,11 @@ textarea,
   .toolgroup {
     gap: 1px;
   }
+  .maincol {
+    --espaco-lateral: 10px;
+  }
   #principal {
-    padding: 10px;
+    padding-block: 10px;
   }
   .topbar .marca,
   .topbar .marca img {
@@ -1104,13 +1113,9 @@ textarea,
 @media (min-width: 691px) {
   .maincol {
     height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
   }
   .topbar,
   .summarystrip,
-  .foot,
   .workflow {
     flex: none;
   }
@@ -1198,12 +1203,6 @@ textarea,
 }
 .credits a:hover {
   text-decoration: underline;
-}
-.foot {
-  border-top: 1px solid var(--line);
-  margin-top: 10px;
-  flex-wrap: wrap;
-  gap: 6px;
 }
 .issues .issuecard {
   margin: 6px 0;

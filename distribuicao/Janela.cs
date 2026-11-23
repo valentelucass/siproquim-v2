@@ -140,7 +140,9 @@ internal sealed class Janela : Form {
                     SetProcessDPIAware();
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
-                    using (var janela = new Janela(new Uri("http://127.0.0.1:" + porta), perfil, ativar, fechar))
+                    // Cada versão abre o próprio HTML, mesmo com o perfil do WebView preservado.
+                    var url = new Uri("http://127.0.0.1:" + porta + "/?v=" + Uri.EscapeDataString(versao));
+                    using (var janela = new Janela(url, perfil, ativar, fechar))
                         Application.Run(janela);
                 }
             }

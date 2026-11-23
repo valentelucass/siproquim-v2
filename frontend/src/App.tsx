@@ -1031,42 +1031,42 @@ export default function App() {
                 </div>
               </Modal>
             )}
-            <footer className="foot">
-              <div className="rodape-versao">
+          </main>
+          <footer className="foot" inert={emVisita}>
+            <div className="rodape-versao">
               <span>
                 © {new Date().getFullYear()} Rodogarcia. Todos os direitos
                 reservados.
               </span>
               <Atualizacao ocupado={Boolean(modal) || passo !== null} />
-              </div>
-              <div className="credits">
-                <span>
-                  Sistema criado por{" "}
-                  <Tooltip content="Abrir o LinkedIn de Lucas Andrade">
-                    <a
-                      href="https://www.linkedin.com/in/dev-lucasandrade/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Lucas Andrade
-                      <SquareArrowOutUpRight size={13} aria-hidden="true" />
-                      <VisuallyHidden>
-                        {" "}
-                        no LinkedIn (abre em nova aba)
-                      </VisuallyHidden>
-                    </a>
-                  </Tooltip>
-                </span>
-                <i />
-                <Tooltip content="Enviar e-mail para o suporte">
-                  <a href="mailto:lucasmac.dev@gmail.com">
-                    <Mail size={14} />
-                    lucasmac.dev@gmail.com
+            </div>
+            <div className="credits">
+              <span>
+                Sistema criado por{" "}
+                <Tooltip content="Abrir o LinkedIn de Lucas Andrade">
+                  <a
+                    href="https://www.linkedin.com/in/dev-lucasandrade/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Lucas Andrade
+                    <SquareArrowOutUpRight size={13} aria-hidden="true" />
+                    <VisuallyHidden>
+                      {" "}
+                      no LinkedIn (abre em nova aba)
+                    </VisuallyHidden>
                   </a>
                 </Tooltip>
-              </div>
-            </footer>
-          </main>
+              </span>
+              <i />
+              <Tooltip content="Enviar e-mail para o suporte">
+                <a href="mailto:lucasmac.dev@gmail.com">
+                  <Mail size={14} />
+                  lucasmac.dev@gmail.com
+                </a>
+              </Tooltip>
+            </div>
+          </footer>
         </div>
         {copiaManual && (
           <Modal titulo="Copiar informações para o desenvolvedor" close={() => setCopiaManual("")}>

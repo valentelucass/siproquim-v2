@@ -1,6 +1,41 @@
 import { etapas } from "../src/roteiro";
 import { expect, test, type Page } from "@playwright/test";
 
+for (const tema of ["light", "dark"] as const) {
+  test(`rodapé fica no fim da janela nas etapas de formulário em ${tema}`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: tema });
+    await page.route("**/api/lotes", route => route.fulfill({ json: [] }));
+    await page.route("**/api/atualizacoes", route => route.fulfill({ json: { disponivel: null } }));
+    await page.goto("/");
+    await expect(page.getByText("Importe seu primeiro lote")).toBeVisible();
+    const rodape = page.locator("footer");
+
+    async function conferirRodape() {
+      await expect.poll(() =>
+        rodape.evaluate(el => Math.abs(innerHeight - el.getBoundingClientRect().bottom)),
+      ).toBeLessThanOrEqual(12);
+    }
+
+    await page.getByRole("button", { name: "Passo a passo", exact: true }).click();
+    const guia = page.getByRole("region", { name: "Passo a passo" });
+    for (let n = 1; n <= etapas.length; n++) {
+      const etapa = etapas[n - 1];
+      await expect(guia.getByText(`Passo ${n} de ${etapas.length}`)).toBeVisible();
+      if (etapa.alvo === "[data-roteiro=criar]" || etapa.alvo === "[data-roteiro=exportar]") {
+        for (const largura of [1919, 615]) {
+          await page.setViewportSize({ width: largura, height: 1010 });
+          await conferirRodape();
+          await conferirBalao(page);
+        }
+      }
+      await guia.getByRole("button", { name: n === etapas.length ? "Concluir" : "Avançar" }).click();
+    }
+    await expect(guia).toHaveCount(0);
+    await conferirRodape();
+    await expect(rodape.getByRole("button", { name: /^Versão/ })).toBeEnabled();
+  });
+}
+
 async function conferirBalao(page: Page) {
   const guia = page.getByRole("region", { name: "Passo a passo" });
   await expect(guia.locator(".roteiro-seta")).toBeVisible();

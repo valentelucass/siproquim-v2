@@ -65,6 +65,24 @@ async function testar() {
         await expect(tela).toHaveAttribute("data-mode", proximo);
         conferirBarra(proximo);
       }
+      if (!proximo) {
+        await pagina.getByRole("button", {name: "Passo a passo", exact: true}).click();
+        const guia = pagina.getByRole("region", {name: "Passo a passo"});
+        const avancar = guia.getByRole("button", {name: "Avançar"});
+        const rodape = pagina.locator("footer");
+        for (let passo = 1; passo <= 12; passo++) {
+          await expect(guia.getByText(`Passo ${passo} de 13`)).toBeVisible();
+          if (passo === 5 || passo === 12) {
+            await expect.poll(() =>
+              rodape.evaluate(el => Math.abs(innerHeight - el.getBoundingClientRect().bottom)),
+              {message: `Rodapé no fim da janela no passo ${passo}`},
+            ).toBeLessThanOrEqual(12);
+          }
+          if (passo < 12) await avancar.click();
+        }
+        await pagina.keyboard.press("Escape");
+        await expect(guia).toHaveCount(0);
+      }
       abrir();
       await esperar(500);
       expect(janela("if ($j.Count -eq 1) { $j[0].MainWindowTitle }")).toBe("SIPROQUIM Rodogarcia");
