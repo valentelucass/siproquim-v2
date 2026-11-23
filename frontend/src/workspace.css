@@ -1580,7 +1580,7 @@ textarea,
   gap: 11px;
   padding: 28px;
 }
-.onboard h3 {
+.onboard :is(h2, h3) {
   font-size: 22px;
   letter-spacing: -0.035em;
 }
@@ -1605,6 +1605,19 @@ textarea,
 .onboardactions {
   justify-content: center;
   margin-top: 4px;
+}
+.conferencia-vazia {
+  flex: none;
+  width: min(100%, 460px);
+  min-height: 0;
+  margin: auto;
+  padding: clamp(20px, 4vw, 32px);
+}
+.conferencia-vazia .welcomeicon {
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  color: var(--blue);
 }
 .filters {
   padding: 14px 20px;
@@ -1815,7 +1828,8 @@ textarea,
   border: 3px solid var(--cor-roteiro); border-radius: 9px;
   box-shadow: 0 0 0 1px light-dark(white,#161616);
 }
-#principal:has(> .roteiro-formulario) {
+#principal:has(> .roteiro-formulario),
+#principal:not([inert]):has(> .conferencia-vazia) {
   display: flex;
   flex-direction: column;
 }

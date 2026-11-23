@@ -28,7 +28,10 @@ import {
   Download,
   FileSearch,
   FileText,
+  FolderOpen,
+  ListStart,
   Pencil,
+  Plus,
   Search,
   Table2,
 } from "lucide-react";
@@ -926,12 +929,45 @@ export default function App() {
                   )}
                 </>
               )}
-            {view === "conferencia" && !r && !loading && (
-              <div className="panel empty">
-                <ClipboardCheck />
-                <h3>Selecione um lote para conferir</h3>
-                <Btn label="Abrir lotes" onClick={() => move("lotes")} />
-              </div>
+            {viewAtual === "conferencia" && !loteAtual && !loading && (lista.length > 0 || !erro) && (
+              <Activity mode={emVisita ? "hidden" : "visible"}>
+                <Card padding={0} className="panel onboard conferencia-vazia">
+                  <div className="welcomeicon">
+                    <ClipboardCheck size={26} aria-hidden="true" />
+                  </div>
+                  <h2>{lista.length ? "Selecione um lote para conferir" : "Importe seu primeiro relatório"}</h2>
+                  <p>
+                    {lista.length
+                      ? "Abra um lote para revisar as pendências e preparar o TXT."
+                      : "Escolha a filial, informe o mês e selecione o PDF dos fretes."}
+                  </p>
+                  <div className="onboardactions">
+                    {lista.length ? (
+                      <Btn
+                        label="Abrir meus lotes"
+                        icon={<FolderOpen size={16} />}
+                        variant="primary"
+                        onClick={() => move("lotes")}
+                      />
+                    ) : (
+                      <>
+                        <Btn
+                          label="Importar relatório"
+                          icon={<Plus size={16} />}
+                          variant="primary"
+                          onClick={() => setModal("import")}
+                        />
+                        <Btn
+                          label="Ver passo a passo"
+                          icon={<ListStart size={16} />}
+                          variant="secondary"
+                          onClick={iniciarRoteiro}
+                        />
+                      </>
+                    )}
+                  </div>
+                </Card>
+              </Activity>
             )}
             {viewAtual === "lotes" && !loading && (
               <Activity mode={emVisita ? "hidden" : "visible"}>
