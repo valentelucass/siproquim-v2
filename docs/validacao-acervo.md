@@ -53,9 +53,9 @@ O roteiro foi conferido nas 13 etapas nos temas claro e escuro. O teste mede se 
 ```powershell
 $env:SIPROQUIM_HISTORICO = 'C:\acervo-privado\relatorios'
 $env:SIPROQUIM_UI_ACERVO = $env:SIPROQUIM_HISTORICO
-.\Backend.ps1 testar
-.\Frontend.ps1 testar
-.\Frontend.ps1 compilar
+.\scripts\Backend.ps1 testar
+.\scripts\Frontend.ps1 testar
+.\scripts\Frontend.ps1 compilar
 ```
 
 Após incluir o passo a passo na página e as dicas da conferência, passaram **46 verificações no Playwright**. Foram 36 verificações independentes dos anexos e uma por PDF do acervo. A rodada incluiu as 13 etapas por clique, a saída com Escape, a preservação da correção em digitação e os textos de ajuda por mouse e teclado nos dois temas. Também passaram 37 testes Java e 5 Python.

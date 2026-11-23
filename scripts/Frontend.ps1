@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param([ValidateSet('iniciar','testar','compilar')][string]$Acao='iniciar')
 $ErrorActionPreference='Stop'
-$raiz=$PSScriptRoot
+$raiz=Split-Path -Parent $PSScriptRoot
 $frontend=Join-Path $raiz 'frontend'
 $jar=Join-Path $raiz 'backend/java/target/siproquim-backend.jar'
 $portaDados=if ($env:SIPROQUIM_PORTA) { [int]$env:SIPROQUIM_PORTA } else { 8765 }
@@ -16,7 +16,7 @@ function Servico([int]$porta) {
     try {
         $env:SIPROQUIM_PORTA="$porta"
         $shell=(Get-Process -Id $PID).Path
-        $processo=Start-Process -FilePath $shell -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',('"' + (Join-Path $raiz 'Backend.ps1') + '"'),'iniciar') -WorkingDirectory $raiz -WindowStyle Hidden -PassThru
+        $processo=Start-Process -FilePath $shell -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',('"' + (Join-Path $PSScriptRoot 'Backend.ps1') + '"'),'iniciar') -WorkingDirectory $raiz -WindowStyle Hidden -PassThru
         $limite=(Get-Date).AddMinutes(3)
         while ((Get-Date) -lt $limite) {
             if (Saudavel $porta) { return }
@@ -35,7 +35,7 @@ try {
         Conferir 'instalação do frontend'
     }
     if ($Acao -eq 'compilar') { & pnpm run build; Conferir 'compilação'; return }
-    if (-not (Test-Path -LiteralPath $jar)) { & (Join-Path $raiz 'Backend.ps1') empacotar; Conferir 'backend' }
+    if (-not (Test-Path -LiteralPath $jar)) { & (Join-Path $PSScriptRoot 'Backend.ps1') empacotar; Conferir 'backend' }
     if ($Acao -eq 'testar') { & pnpm test; Conferir 'testes no navegador'; return }
     Servico $portaDados
     $url='http://127.0.0.1:5173/'

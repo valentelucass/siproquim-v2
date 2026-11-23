@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 104" width="800" height="104" role="img" aria-labelledby="titulo">
+  <title id="titulo">Baixar o instalador para Windows 64 bits</title>
+  <rect width="800" height="104" rx="16" fill="#1747ae"/>
+  <rect x="24" y="22" width="60" height="60" rx="14" fill="#103887"/>
+  <g fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M54 35v22m-9-9 9 9 9-9M40 61v6h28v-6"/>
+  </g>
+  <g fill="white" font-family="Segoe UI, Arial, sans-serif">
+    <text x="106" y="52" font-size="37" font-weight="700">Baixar o instalador</text>
+    <text x="108" y="78" font-size="19">SIPROQUIM · Windows 64 bits</text>
+  </g>
+  <path d="m748 42 10 10-10 10m-17-10h26" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

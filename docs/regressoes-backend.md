@@ -33,7 +33,7 @@ Em 22/11/2026, a execução completa no Windows passou em **37 testes Java e 5 t
 
 ## Como repetir
 
-1. Em PowerShell, na raiz do projeto, execute `.\Backend.ps1 testar`. As amostras fictícias acompanham o código e os bancos de teste são temporários.
+1. Em PowerShell, na raiz do projeto, execute `.\scripts\Backend.ps1 testar`. As amostras fictícias acompanham o código e os bancos de teste são temporários.
 2. Para repetir a execução integral, defina antes `$env:SIPROQUIM_HISTORICO = 'C:\caminho\para\anexos'`. A pasta deve conter os nove PDFs e os três TXTs originais da exportação privada. Sem essa variável, o Maven pula os três casos que leem TXTs privados e o iniciador omite o ensaio externo dos nove PDFs.
 3. A cada novo defeito, acrescente um teste que reproduza o erro pela entrada afetada. Execute-o antes de corrigir, confira que falhou pelo motivo esperado, aplique a correção e repita o teste e a suíte. Registre aqui o sintoma, a origem da evidência e a proteção criada. Use dados fictícios para material versionado.
 

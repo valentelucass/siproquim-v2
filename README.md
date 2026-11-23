@@ -1,6 +1,12 @@
 # SIPROQUIM · Rodogarcia
 
-**[Baixar o instalador para Windows 64 bits](https://github.com/valentelucass/siproquim-v2/releases/latest/download/Siproquim-Rodogarcia-x64.msi)** · [Versões e notas de atualização](https://github.com/valentelucass/siproquim-v2/releases)
+[![Baixar o instalador do SIPROQUIM para Windows 64 bits](docs/midia/baixar-windows.svg)](https://github.com/valentelucass/siproquim-v2/releases/latest/download/Siproquim-Rodogarcia-x64.msi)
+
+### Do PDF ao TXT em 32 segundos
+
+https://github.com/user-attachments/assets/423766f8-808a-47a1-babd-a5605ee65965
+
+[Versões e notas de atualização](https://github.com/valentelucass/siproquim-v2/releases)
 
 Aplicativo local da Rodogarcia para transformar relatórios de frete em TXT de transporte para o **SIPROQUIM 2 da Polícia Federal**. A operadora confere cada pendência no PDF, registra a correção e acompanha o histórico do lote até o protocolo.
 
@@ -34,10 +40,10 @@ A instalação guarda os lotes e documentos em `%LOCALAPPDATA%\Rodogarcia\Siproq
 Para desenvolvimento no Windows, instale JDK 25, Python 3.12, Node.js compatível com Vite 7 e pnpm. A partir da raiz, execute:
 
 ```powershell
-.\Backend.ps1 testar
-.\Frontend.ps1 compilar
-.\Frontend.ps1 testar
-.\Frontend.ps1 iniciar
+.\scripts\Backend.ps1 testar
+.\scripts\Frontend.ps1 compilar
+.\scripts\Frontend.ps1 testar
+.\scripts\Frontend.ps1 iniciar
 ```
 
 Os testes de navegador usam o Microsoft Edge. A suíte funciona com PDFs fictícios. Quem tem acesso ao acervo histórico pode habilitar os testes adicionais conforme o guia. A validação local e a entrega no portal são etapas distintas. A confirmação de um envio real da V2 depende do recibo da PF.

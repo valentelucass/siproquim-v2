@@ -4,7 +4,7 @@ param(
     [string]$Acao = 'iniciar'
 )
 $ErrorActionPreference = 'Stop'
-$raizProjeto = $PSScriptRoot
+$raizProjeto = Split-Path -Parent $PSScriptRoot
 $pastaJava = Join-Path $raizProjeto 'backend/java'
 $pastaPython = Join-Path $raizProjeto 'backend/python'
 $ambientePython = Join-Path $pastaPython '.venv'

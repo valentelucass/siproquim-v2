@@ -22,7 +22,9 @@ def main():
         target.mkdir(parents=True)
         jar = target / "siproquim-backend.jar"
         shutil.copy2(ROOT / "backend/java/target" / jar.name, jar)
-        shutil.copy2(ROOT / "Backend.ps1", base)
+        script = Path("scripts/Backend.ps1")
+        (base / script.parent).mkdir()
+        shutil.copy2(ROOT / script, base / script)
         with socket.socket() as sock:
             sock.bind(("127.0.0.1", 0))
             port = sock.getsockname()[1]
@@ -41,7 +43,7 @@ def main():
         id_lote = None
         for vez in range(2):
             processo = subprocess.Popen([powershell, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
-                                         str(base/"Backend.ps1"), "iniciar"],env=env,
+                                         str(base / script), "iniciar"],env=env,
                                         stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
             try:
                 for _ in range(120):

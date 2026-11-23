@@ -1,6 +1,6 @@
 # Conferência de fretes no navegador
 
-Em PowerShell, na raiz da V2, use `.\Frontend.ps1 iniciar` e abra [Conferência de fretes](http://127.0.0.1:5173/). No Windows, o ambiente testado usa Node 24, pnpm 11, JDK 25, Python 3.12 e Edge. A instalação inicial das dependências requer internet. As páginas, fontes e visualização do PDF são servidas pela máquina.
+Em PowerShell, na raiz da V2, use `.\scripts\Frontend.ps1 iniciar` e abra [Conferência de fretes](http://127.0.0.1:5173/). No Windows, o ambiente testado usa Node 24, pnpm 11, JDK 25, Python 3.12 e Edge. A instalação inicial das dependências requer internet. As páginas, fontes e visualização do PDF são servidas pela máquina.
 
 ## Da importação ao recibo
 
@@ -22,7 +22,7 @@ Componentes, temas e composição visual seguem as referências indicadas por Lu
 
 ## Testes e regressões
 
-Na raiz, execute `.\Frontend.ps1 testar` para o navegador e `.\Frontend.ps1 compilar` para TypeScript e a distribuição web. O Playwright inicia a aplicação e a API com um banco temporário. A suíte usa um PDF fictício e testa o fluxo da importação à retificação pela API local. A entrega efetiva ao portal exige recibo emitido pela PF.
+Na raiz, execute `.\scripts\Frontend.ps1 testar` para o navegador e `.\scripts\Frontend.ps1 compilar` para TypeScript e a distribuição web. O Playwright inicia a aplicação e a API com um banco temporário. A suíte usa um PDF fictício e testa o fluxo da importação à retificação pela API local. A entrega efetiva ao portal exige recibo emitido pela PF.
 
 | Sintoma ou fluxo | Como reproduzir a verificação |
 |---|---|

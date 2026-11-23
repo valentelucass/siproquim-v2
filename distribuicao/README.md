@@ -8,9 +8,9 @@ O instalador tem nome fixo para que o botão do README continue válido a cada v
 4. Baixe o link do README sem autenticação e compare o SHA-256. Na estação de ensaio, confirme o aviso, a versão no rodapé e a reabertura de um lote.
 
 ```powershell
-.\Backend.ps1 testar
-.\Frontend.ps1 compilar
-.\Frontend.ps1 testar
+.\scripts\Backend.ps1 testar
+.\scripts\Frontend.ps1 compilar
+.\scripts\Frontend.ps1 testar
 $versao = (Get-Content frontend/package.json -Raw | ConvertFrom-Json).version
 $msi = "release/v$versao/Siproquim-Rodogarcia-x64.msi"
 & backend/python/.venv/Scripts/python.exe -B distribuicao/empacotar.py

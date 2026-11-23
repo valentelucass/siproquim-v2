@@ -7,7 +7,7 @@ O backend recebe o PDF de fretes de uma filial e competência, mostra o que prec
 Na raiz de `siproquim-v2`, use PowerShell com JDK 25 e Python 3.12 disponíveis. O iniciador pode usar `uv` para preparar o Python. A primeira instalação de dependências e a primeira compilação precisam de acesso aos respectivos repositórios. O ZIP inclui o JAR pronto.
 
 ```powershell
-.\Backend.ps1 iniciar
+.\scripts\Backend.ps1 iniciar
 ```
 
 A API atende em `http://127.0.0.1:8765/api`. Em outro PowerShell aberto na raiz, os comandos abaixo conferem a saúde do serviço e listam os lotes. O token é criado no primeiro uso.
@@ -19,7 +19,7 @@ Invoke-RestMethod "$api/saude"
 Invoke-RestMethod "$api/lotes" -Headers $cabecalho
 ```
 
-Para recompilar o JAR depois de alterar o Java e executar os testes, use `.\Backend.ps1 testar`. A ação `empacotar` também testa antes de entregar `backend/java/target/siproquim-backend.jar`. Com a exportação histórica disponível, defina `SIPROQUIM_HISTORICO` com o caminho da pasta que contém os anexos antes de executar o comando. [Resultados e reprodução](regressoes-backend.md)
+Para recompilar o JAR depois de alterar o Java e executar os testes, use `.\scripts\Backend.ps1 testar`. A ação `empacotar` também testa antes de entregar `backend/java/target/siproquim-backend.jar`. Com a exportação histórica disponível, defina `SIPROQUIM_HISTORICO` com o caminho da pasta que contém os anexos antes de executar o comando. [Resultados e reprodução](regressoes-backend.md)
 
 ## O que fica salvo
 
