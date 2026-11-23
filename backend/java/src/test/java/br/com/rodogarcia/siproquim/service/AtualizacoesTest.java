@@ -1,13 +1,36 @@
 package br.com.rodogarcia.siproquim.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import com.sun.net.httpserver.HttpServer;
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.security.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.json.JsonMapper;
 
 class AtualizacoesTest {
+  @Test void consultaDoManifestoEvitaCacheDeRedirecionamento() throws Exception {
+    var consulta = new AtomicReference<String>();
+    var canal = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    canal.createContext("/latest/download/atualizacao.json", requisicao -> {
+      consulta.set(requisicao.getRequestURI().getRawQuery());
+      requisicao.sendResponseHeaders(503, -1);
+      requisicao.close();
+    });
+    canal.start();
+    try {
+      var atualizacoes = new Atualizacoes(JsonMapper.builder().build(), "2.0.2",
+          "http://127.0.0.1:" + canal.getAddress().getPort(), ".", false);
+      assertThrows(Falha.class, () -> atualizacoes.estado(false));
+      assertNotNull(consulta.get());
+      assertTrue(consulta.get().matches("consulta=[0-9]+"));
+    } finally {
+      canal.stop(0);
+    }
+  }
   @Test void comparaVersoesNumericamente() {
     assertTrue(Atualizacoes.maisNova("2.10.0", "2.9.9"));
     assertFalse(Atualizacoes.maisNova("2.0.0", "2.0.0"));

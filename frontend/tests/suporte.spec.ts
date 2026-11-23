@@ -25,7 +25,7 @@ comLote("o suporte inclui todas as pendências e operações prontas mesmo com a
 for (const tema of ["light", "dark"] as const) {
   test("modal de atualização mantém recuo e separação das ações em " + tema, async ({page}) => {
     await page.emulateMedia({colorScheme:tema});
-    await page.route("**/api/atualizacoes", r => r.fulfill({json:{disponivel:null}}));
+    await page.route(/\/api\/atualizacoes(?:\?forcar=true)?$/, r => r.fulfill({json:{disponivel:null}}));
     await page.goto("/");
     await page.locator("footer button").click();
     const dialogo = page.getByRole("dialog", {name:"Atualizações do sistema"});

@@ -5,7 +5,7 @@ O instalador tem nome fixo para que o botão do README continue válido a cada v
 1. Ajuste a versão estável nos arquivos `frontend/package.json`, `backend/java/pom.xml` e `backend/java/src/main/resources/application.properties`. Use três números, por exemplo `2.0.1`.
 2. No Windows x64 com PowerShell 7, JDK 25, Python 3.12 x64 e pnpm, execute os comandos abaixo pela raiz. O empacotador usa o jlink, o compilador do .NET Framework do Windows e a biblioteca MSI do Python 3.12. A compilação do frontend e o empacotamento do backend precedem a criação do MSI.
 3. Faça commit, envie o código e a tag `v<Versão>` ao GitHub. Crie uma release em rascunho nessa tag. Anexe **Siproquim-Rodogarcia-x64.msi**, **atualizacao.json** e **SHA256SUMS.txt** gerados juntos em `release/v<Versão>/`. Publique como release estável depois de conferir os três arquivos. Use uma nova tag para qualquer correção.
-4. Baixe o link do README sem autenticação e compare o SHA-256. Na estação de ensaio, confirme o aviso, a versão no rodapé e a reabertura de um lote.
+4. Baixe o link do README sem autenticação e compare o SHA-256. Depois de publicar, rode `testar_canal.py` com o MSI da release anterior e o atual. Conclua a entrega quando a versão anterior reconhecer a publicação, verificar a assinatura e baixar o MSI esperado pelo canal público. Na estação de ensaio, confira também o aviso e o rodapé.
 
 ```powershell
 .\scripts\Backend.ps1 testar
@@ -18,6 +18,15 @@ $msi = "release/v$versao/Siproquim-Rodogarcia-x64.msi"
 & backend/python/.venv/Scripts/python.exe -B distribuicao/testar_msi.py $msi
 .\distribuicao\Assinar.ps1 -Instalador $msi -Versao $versao
 ```
+
+Depois de publicar, ajuste o caminho da versão anterior e confira o mesmo canal que o aplicativo consulta:
+
+```powershell
+$anterior = "release/v2.0.3/Siproquim-Rodogarcia-x64.msi"
+& backend/python/.venv/Scripts/python.exe -B distribuicao/testar_canal.py $anterior $msi
+```
+
+O ensaio usa um perfil temporário e baixa o MSI pela API da instalação anterior. O GitHub pode levar alguns minutos para trocar o redirecionamento de `latest` após a publicação. O teste aguarda a propagação por até quatro minutos.
 
 ## Assinatura e teste de atualização
 

@@ -28,7 +28,12 @@ for (const tema of ["dark", "light"] as const) {
 }
 test("consulta sem internet permite tentar novamente e não interrompe a conferência", async ({page}) => {
   let online = false;
-  await page.route("**/api/atualizacoes", r => online ? r.fulfill({json:{disponivel:null}}) : r.fulfill({status:503}));
+  const consultasManuais: string[] = [];
+  await page.route(/\/api\/atualizacoes(?:\?forcar=true)?$/, r => {
+    const forcar = new URL(r.request().url()).searchParams.get("forcar");
+    if (forcar) consultasManuais.push(forcar);
+    return online ? r.fulfill({json:{disponivel:null}}) : r.fulfill({status:503});
+  });
   await page.goto("/");
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.locator("footer button").click();
@@ -36,6 +41,7 @@ test("consulta sem internet permite tentar novamente e não interrompe a confer�
   online = true;
   await page.getByRole("button", {name:"Verificar novamente"}).click();
   await expect(page.getByText(/já está usando a versão mais recente/)).toBeVisible();
+  expect(consultasManuais).toEqual(["true", "true"]);
 });
 test("uma versão publicada durante a conferência avisa uma vez e segue disponível para depois", async ({page}) => {
   let disponivel: string | null = null;
@@ -49,10 +55,10 @@ test("uma versão publicada durante a conferência avisa uma vez e segue dispon�
   await expect.poll(() => consultas).toBe(1);
   await expect(page.getByRole("dialog")).toHaveCount(0);
   disponivel = "2.0.1";
-  await page.clock.fastForward(300_001);
+  await page.clock.fastForward(30_001);
   await expect(page.getByRole("dialog", {name:"Atualização disponível"})).toBeVisible();
   await page.getByRole("button", {name:"Agora não"}).click();
-  await page.clock.fastForward(300_001);
+  await page.clock.fastForward(30_001);
   await expect.poll(() => consultas).toBeGreaterThanOrEqual(3);
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.locator("footer").getByRole("button", {name:"Atualizar para 2.0.1"})).toBeVisible();

@@ -66,10 +66,11 @@ public class Atualizacoes {
     return conexao.getInputStream();
   }
 
-  private synchronized Manifesto consultar() {
+  private synchronized Manifesto consultar(boolean forcar) {
     long agora = System.nanoTime();
-    if (ultimo != null && agora - consultado < 60_000_000_000L) return ultimo;
-    try (var in = abrir("/latest/download/atualizacao.json")) {
+    if (!forcar && ultimo != null && agora - consultado < 25_000_000_000L) return ultimo;
+    // O redirecionamento latest do GitHub também pode ser guardado por caches intermediários.
+    try (var in = abrir("/latest/download/atualizacao.json?consulta=" + System.currentTimeMillis())) {
       byte[] bytes = in.readNBytes(8193);
       if (bytes.length > 8192) throw new IOException();
       var manifesto = json.readValue(bytes, Manifesto.class);
@@ -84,13 +85,13 @@ public class Atualizacoes {
     }
   }
 
-  public Estado estado() {
-    var m = consultar();
+  public Estado estado(boolean forcar) {
+    var m = consultar(forcar);
     return new Estado(atual, maisNova(m.versao(), atual) ? m.versao() : null);
   }
 
   public synchronized Instalacao instalar(String solicitada) {
-    var m = consultar();
+    var m = consultar(false);
     if (!m.versao().equals(solicitada) || !maisNova(m.versao(), atual))
       throw Falha.conflito("Consulte novamente a versão disponível.");
     Path parte = null;

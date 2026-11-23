@@ -26,7 +26,7 @@ Se precisar de ajuda, clique no ícone de **Copiar informações para o desenvol
 
 ## Atualizar
 
-O sistema verifica as versões ao abrir, ao retornar à janela e a cada cinco minutos durante o uso. Quando chega uma versão nova, um aviso mostra o número instalado e o disponível. Salve a correção que estiver digitando e escolha **Atualizar agora**. O aplicativo verifica a assinatura e o conteúdo do pacote antes de abrir o instalador do Windows. Ao terminar a instalação iniciada pelo aplicativo, o sistema reabre. Se precisar, use o atalho do menu Iniciar.
+O sistema verifica as versões ao abrir e a cada 30 segundos enquanto a janela está visível. Ao retornar à janela após esse intervalo, ele consulta novamente. Quando chega uma versão nova, um aviso mostra o número instalado e o disponível. Salve a correção que estiver digitando e escolha **Atualizar agora**. O aplicativo verifica a assinatura e o conteúdo do pacote antes de abrir o instalador do Windows. Ao terminar a instalação iniciada pelo aplicativo, o sistema reabre. Se precisar, use o atalho do menu Iniciar.
 
 **Agora não** fecha o aviso. A opção **Atualizar para…** continua ao lado de “Todos os direitos reservados” no rodapé. Ao clicar na versão instalada, você também pode consultar manualmente. A conferência local continua disponível sem internet.
 

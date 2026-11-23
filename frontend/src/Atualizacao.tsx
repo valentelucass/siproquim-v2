@@ -6,6 +6,8 @@ import { ler } from "./api";
 import { registrarVersaoApi } from "./diagnostico";
 import { version } from "../package.json";
 
+const INTERVALO_CONSULTA = 30_000;
+
 export function Atualizacao({ ocupado }: { ocupado: boolean }) {
   const [instalada, setInstalada] = useState(version);
   const [disponivel, setDisponivel] = useState("");
@@ -20,20 +22,25 @@ export function Atualizacao({ ocupado }: { ocupado: boolean }) {
   const ultima = useRef(0);
   const emDownload = useRef(false);
 
-  const consultar = useCallback(async (manual = false) => {
-    if (manual) consultaManual.current = true;
-    if (consultando.current || emDownload.current) return;
+  const consultar = useCallback(async function consultar(manual = false) {
+    if (emDownload.current) return;
+    if (consultando.current) {
+      if (manual) consultaManual.current = true;
+      return;
+    }
     consultando.current = true;
     checar(true);
     ultima.current = Date.now();
     try {
-      const estado = await ler<{instalada: string; disponivel: string | null}>("/atualizacoes");
+      const estado = await ler<{instalada: string; disponivel: string | null}>(
+        manual ? "/atualizacoes?forcar=true" : "/atualizacoes",
+      );
       if (estado.instalada) {
         setInstalada(estado.instalada);
         registrarVersaoApi(estado.instalada);
       }
       setDisponivel(estado.disponivel || "");
-      if (!estado.disponivel || consultaManual.current || estado.disponivel !== anunciado.current) {
+      if (!estado.disponivel || manual || estado.disponivel !== anunciado.current) {
         setFalhou(false);
         informar("");
       }
@@ -41,23 +48,27 @@ export function Atualizacao({ ocupado }: { ocupado: boolean }) {
         anunciado.current = estado.disponivel;
         informar("");
         abrir(true);
-      } else if (consultaManual.current) informar(estado.disponivel ? "" : "Você já está usando a versão mais recente.");
+      } else if (manual) informar(estado.disponivel ? "" : "Você já está usando a versão mais recente.");
     } catch {
-      if (consultaManual.current) {
+      if (manual) {
         setFalhou(true);
         informar("Não foi possível consultar as atualizações. Confira sua conexão e tente novamente.");
       }
     } finally {
       consultando.current = false;
-      consultaManual.current = false;
-      checar(false);
+      if (consultaManual.current) {
+        consultaManual.current = false;
+        void consultar(true);
+      } else checar(false);
     }
   }, []);
 
   useEffect(() => {
     void consultar();
-    const timer = window.setInterval(() => { if (!document.hidden) void consultar(); }, 5 * 60_000);
-    const voltar = () => { if (!document.hidden && Date.now() - ultima.current >= 60_000) void consultar(); };
+    const timer = window.setInterval(() => { if (!document.hidden) void consultar(); }, INTERVALO_CONSULTA);
+    const voltar = () => {
+      if (!document.hidden && Date.now() - ultima.current >= INTERVALO_CONSULTA) void consultar();
+    };
     window.addEventListener("focus", voltar);
     document.addEventListener("visibilitychange", voltar);
     return () => {

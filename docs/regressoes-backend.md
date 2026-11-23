@@ -41,6 +41,8 @@ A amostra de duas notas de Agudos continua indisponível. Importação internaci
 
 ## Distribuição para Windows
 
+Na entrega da 2.0.3, o GitHub já mostrava a release, mas o aplicativo 2.0.2 ainda recebia o manifesto anterior. A janela também podia aguardar cinco minutos para a próxima consulta. A partir da 2.0.4, a consulta inclui um identificador que evita reaproveitar o redirecionamento anterior. O rodapé pode forçar uma consulta, e a janela visível verifica a cada 30 segundos. O ensaio do canal público consulta e baixa o MSI com o código da versão anterior.
+
 Na 2.0.1, concluir uma instalação manual deixava o aplicativo fechado. O ensaio com o Windows Installer reproduziu zero aberturas após a instalação. Na 2.0.2, o MSI chama o iniciador depois de concluir a instalação ou atualização interativa. O ensaio conta uma chamada em cada caso e confere também o reparo, a remoção e a instalação silenciosa.
 
 O teste do aplicativo instalado abre a janela WebView2 pelo executável do Windows, troca o tema pelo botão do cabeçalho e verifica a escolha depois de fechar e abrir de novo. Um novo clique no iniciador deve ativar a janela existente. O ensaio com a 2.0.1 publicada reabre o lote criado pela versão anterior. Dois pacotes de ensaio com janela própria permitem verificar também a conservação da escolha de tema durante a atualização.
