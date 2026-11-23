@@ -5,6 +5,7 @@ import { Tooltip } from "@astryxdesign/core/Tooltip";
 import {
   BookOpen,
   ClipboardCheck,
+  ClipboardList,
   Eye,
   ListStart,
   FolderOpen,
@@ -59,6 +60,7 @@ export function Barra({
   roteiro,
   criar,
   previa,
+  suporte,
   lote,
 }: {
   emRoteiro: boolean;
@@ -69,6 +71,7 @@ export function Barra({
   roteiro: () => void;
   criar: () => void;
   previa: () => void;
+  suporte: () => void;
   lote: boolean;
 }) {
   return (
@@ -171,6 +174,12 @@ export function Barra({
               onClick={previa}
             />
           </Tooltip>
+          <AcaoIcone
+            nome="Copiar informações para o desenvolvedor"
+            dica="Deu erro? Clique para copiar os detalhes e cole na conversa com o suporte."
+            icone={<ClipboardList size={17} />}
+            onClick={suporte}
+          />
           <AcaoIcone
             nome={tema === "light" ? "Ativar tema escuro" : "Ativar tema claro"}
             dica={

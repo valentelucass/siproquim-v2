@@ -1,6 +1,7 @@
 * text=auto
 *.pdf binary
 *.png binary
+*.ico binary
 *.woff2 binary
 *.cmd text eol=crlf
 backend/java/mvnw text eol=lf

@@ -15,7 +15,9 @@ import { Card } from "@astryxdesign/core/Card";
 import { Arquivo, Historico } from "./Arquivo";
 import { PendenciasTxt } from "./PendenciasTxt";
 import { Guia } from "./Guia";
-import { Barra, type View } from "./Barra";
+import { Barra, titulos, type View } from "./Barra";
+import { acao, relatorioDeSuporte } from "./diagnostico";
+import { descreverLote } from "./relatorioLote";
 import {
   Check,
   CheckCheck,
@@ -88,6 +90,7 @@ const dicas = {
     "Consulte os outros dados desta operação e escolha qual deles quer conferir.",
 };
 const TAMANHO_PAGINA = 25;
+const janelas: Record<string, string> = {import:"Novo lote", txt:"Prévia do TXT", editar:"Corrigir campo", campos:"Campos da operação", processamento:"Registrar processamento", recibo:"Registrar recibo", reabrir:"Reabrir lote"};
 const textoBusca = (texto: string) =>
   texto
     .trim()
@@ -131,6 +134,8 @@ export default function App() {
     [txt, setTxt] = useState(""),
     [txtError, setTxtError] = useState("");
   const modal = cena ? tipoCena[cena].modal : modalAtual;
+  const [copiaManual, setCopiaManual] = useState("");
+  const textoSuporte = useRef<HTMLTextAreaElement>(null);
   const rascunho = useRef<Rascunho | null>(null);
   useEffect(() => {
     if (modalAtual !== "editar") rascunho.current = null;
@@ -179,6 +184,13 @@ export default function App() {
   }, [r]);
   const op = operacoesPorId.get(opId);
   const pagina = emVisita ? op?.paginas[0] || 1 : paginaAtualPdf;
+  useEffect(() => {
+    let etapa = titulos[view] + (modal ? " · " + (janelas[modal] || "Janela aberta") : "");
+    if (view === "conferencia" && op && todosCampos.includes(campo)) {
+      etapa += " · " + (tab === "pdf" ? "PDF" : "Dados extraídos") + " · pág. " + pagina + " · op. " + op.id + " · " + rotulo(campo);
+    }
+    acao(etapa);
+  }, [view, modal, op?.id, campo, pagina, tab]);
   const q = r?.pendencias || [];
   const podeEditar = r && ["CONFERENCIA", "EXPORTADO"].includes(r.lote.estado);
   const nops = r?.lote.operacoes.length || 0;
@@ -403,6 +415,24 @@ export default function App() {
     setToast("O lote mudou. Confira a versão atual antes de corrigir.");
   }
   const selected = q.find((p) => p.operacao === opId && p.campo === campo);
+  async function copiarSuporte() {
+    const contexto = ["Tela: " + titulos[view] + (modal ? " · " + (janelas[modal] || "Janela aberta") : ""), "Tema: " + (tema === "dark" ? "escuro" : "claro")];
+    if (r) {
+      contexto.push("Lote: " + r.lote.id + " · revisão " + r.lote.versao + " · " + (estados[r.lote.estado] || r.lote.estado),
+        "Competência: " + r.lote.competencia + " · " + nops + " operações · " + q.length + " pendências");
+      if (view === "conferencia") {
+        contexto.push("Prévia: " + (tab === "pdf" ? "PDF" : "dados extraídos") + " · " + (r.lote.paginas ? "página " + pagina + " de " + r.lote.paginas : "sem PDF"));
+        if (op && todosCampos.includes(campo)) contexto.push("Operação: " + op.id + " · Campo: " + rotulo(campo) + " (" + campo + ")");
+      }
+    } else contexto.push("Lote: nenhum aberto");
+    const texto = relatorioDeSuporte(r ? contexto.concat(descreverLote(r)) : contexto);
+    try {
+      await navigator.clipboard.writeText(texto);
+      setToast("Informações copiadas. Cole na conversa com o suporte.");
+    } catch {
+      setCopiaManual(texto);
+    }
+  }
   const irParaPdf = op && (
     <a
       className="paneljump"
@@ -429,6 +459,7 @@ export default function App() {
             roteiro={iniciarRoteiro}
             criar={() => setModal("import")}
             previa={() => setModal("txt")}
+            suporte={copiarSuporte}
             lote={!!r}
             tema={tema}
             toggle={() => {
@@ -1033,6 +1064,18 @@ export default function App() {
             </footer>
           </main>
         </div>
+        {copiaManual && (
+          <Modal titulo="Copiar informações para o desenvolvedor" close={() => setCopiaManual("")}>
+            <div className="suporte-manual">
+              <p>O navegador bloqueou a cópia automática. Selecione o texto, copie e cole na conversa com o suporte.</p>
+              <textarea aria-label="Relatório de suporte" ref={textoSuporte} value={copiaManual} readOnly />
+              <div className="actions">
+                <Btn label="Fechar" variant="ghost" onClick={() => setCopiaManual("")} />
+                <Btn label="Selecionar texto" onClick={() => { textoSuporte.current?.focus(); textoSuporte.current?.select(); }} />
+              </div>
+            </div>
+          </Modal>
+        )}
         {toast && (
           <div role="status" className="toast">
             <Check size={16} />

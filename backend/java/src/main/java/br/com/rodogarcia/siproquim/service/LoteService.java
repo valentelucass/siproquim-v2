@@ -39,7 +39,8 @@ public class LoteService {
       String retirada,
       String entrega,
       String armazenamento,
-      String contratanteInternacional) {}
+      String contratanteInternacional,
+      Set<String> camposAvaliados) {}
 
   public record Resultado(Lote lote, List<Pendencia> pendencias, List<Decisao> decisoes) {}
 
@@ -47,7 +48,8 @@ public class LoteService {
 
   public Resultado consultar(String id) {
     Lote lote = lotes.obter(id);
-    List<Pendencia> pendencias = regras.conferir(lote.competencia(), lote.operacoes());
+    var avaliacao = regras.avaliar(lote.competencia(), lote.operacoes());
+    List<Pendencia> pendencias = avaliacao.pendencias();
     var comFalhas = new HashSet<Integer>();
     pendencias.forEach(p -> comFalhas.add(p.operacao()));
     List<Decisao> decisoes =
@@ -67,7 +69,8 @@ public class LoteService {
                       o.padrao("retiradaTipo", "P"),
                       o.padrao("entregaTipo", "P"),
                       o.padrao("armazenamentoTipo", "P"),
-                      tipo.equals("TN") ? "" : Regras.ladoContratante(o));
+                      tipo.equals("TN") ? "" : Regras.ladoContratante(o),
+                      avaliacao.camposAvaliados().get(o.id()));
                 })
             .toList();
     return new Resultado(lote, pendencias, decisoes);

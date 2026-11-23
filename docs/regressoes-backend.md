@@ -41,4 +41,12 @@ A amostra de duas notas de Agudos continua indisponível. Importação internaci
 
 ## Distribuição para Windows
 
+Na versão 2.0.1 o ensaio confere todas as resoluções da folha dobrada no executável e a associação do ícone aos dois atalhos e à lista de aplicativos do Windows. A opção `--anterior` utiliza a aplicação e os runtimes extraídos do MSI publicado para criar o lote usado na comparação.
+
+Ao testar a troca da 2.0.0 para a 2.0.1 com conteúdos diferentes, o Windows manteve o iniciador anterior. A tabela de arquivos do MSI agora declara a versão do executável e associa o ZIP à mesma versão. O ensaio confere os bytes instalados dos dois arquivos, consulta a versão do serviço que o atalho abriu e depois compara os dados originais do lote.
+
+O teste de suporte envia um arquivo com cabeçalho PDF inválido pela interface e verifica se a cópia contém a falha HTTP e a origem no Java. Há cobertura adicional para a cópia manual quando o serviço local está fora do ar.
+
+O relatório original contava pendências, mas omitia o motivo e as operações prontas. O teste da fila filtrada reproduziu a omissão antes da correção. O Java registra quais campos passaram pela validação de cada operação, e o frontend combina essa lista com as pendências da mesma decisão. O teste do acervo confere cada ocorrência da amostra de nove páginas no texto copiado.
+
 O ensaio do MSI verifica os atalhos no menu Iniciar e na área de trabalho, inclusive quando o Windows redireciona a área de trabalho para o OneDrive. Compara o conteúdo extraído com o JAR e a interface compilados, importa um PDF de seis páginas e reabre o mesmo lote depois de atualizar. A suíte Java cobre comparação de versões, assinatura alterada e pacote adulterado. [Repetir o ensaio](../distribuicao/README.md)

@@ -15,6 +15,7 @@ import org.springframework.web.servlet.config.annotation.*;
 public class AcessoLocal implements WebMvcConfigurer {
   private final byte[] token;
   private final String origem;
+  @Value("${siproquim.versao}") private String versao;
   @Value("${siproquim.desktop:false}") private boolean desktop;
 
   public AcessoLocal(
@@ -65,6 +66,7 @@ public class AcessoLocal implements WebMvcConfigurer {
               public boolean preHandle(
                   HttpServletRequest req, HttpServletResponse res, Object handler)
                   throws IOException {
+                res.setHeader("X-Siproquim-Versao", versao);
                 if (org.springframework.web.cors.CorsUtils.isPreFlightRequest(req)) return true;
                 String host = req.getHeader("Host");
                 String origemPedido = req.getHeader("Origin");

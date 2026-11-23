@@ -20,6 +20,10 @@ Aplicativo local da Rodogarcia para transformar relatórios de frete em TXT de t
 
 O primeiro botão do cabeçalho abre um passo a passo na própria tela. [Guia da interface](docs/frontend.md) · [Fechamento mensal e recibo](docs/fechamento-mensal.md)
 
+## Pedir ajuda
+
+Se precisar de ajuda, clique no ícone de **Copiar informações para o desenvolvedor** no cabeçalho e cole o relatório na conversa com Lucas. Para cada frete, o texto identifica a nota e a página, explica as pendências e lista as verificações atendidas. Também informa a versão e a última falha técnica. Se o navegador pedir cópia manual, escolha **Selecionar texto** e pressione **Ctrl+C**.
+
 ## Atualizar
 
 O sistema verifica as versões ao abrir, ao retornar à janela e a cada cinco minutos durante o uso. Quando chega uma versão nova, um aviso mostra o número instalado e o disponível. Salve a correção que estiver digitando e escolha **Atualizar agora**. O aplicativo verifica a assinatura e o conteúdo do pacote antes de abrir o instalador do Windows. Ao terminar a instalação iniciada pelo aplicativo, o sistema reabre. Se precisar, use o atalho do menu Iniciar.

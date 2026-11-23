@@ -1825,3 +1825,17 @@ textarea,
 .versao-app.disponivel { color: light-dark(#174891, #c1d5ff); background: light-dark(#e5edff, #233957); }
 .versao-app:hover { text-decoration: underline; }
 .versao-app:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+
+.update-dialog { display: flex; flex-direction: column; overflow-y: auto; min-height: 0; }
+.update-body, .suporte-manual { padding: 20px 22px; }
+.update-status { display: grid; grid-template-columns: 40px minmax(0,1fr); gap: 12px; align-items: start; }
+.update-status strong { display: block; font-size: 16px; line-height: 1.4; }
+.update-status p, .suporte-manual p { margin: 4px 0 0; color: var(--color-text-secondary, light-dark(#515761,#c3c6ce)); line-height: 1.5; overflow-wrap: anywhere; }
+.update-icon { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; color: light-dark(#244f9c,#b3d0ff); background: light-dark(#eaf0fc,#27374d); }
+.update-icon[data-tom="ok"] { color: light-dark(#25643e,#a9ddba); background: light-dark(#e8f3ed,#24392c); }
+.update-icon[data-tom="aviso"] { color: light-dark(#73520c,#f5cb77); background: light-dark(#fff1d3,#453925); }
+.update-version { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:20px; padding:10px 12px; border-radius:8px; background:light-dark(#f1f3f5,#303033); }
+.update-version strong { font-variant-numeric:tabular-nums; }
+.update-actions { padding:12px 22px; border-top:1px solid light-dark(#e3e3e3,#424242); flex-wrap:wrap; }
+.suporte-manual { display:grid; gap:14px; min-height:0; overflow:auto; }
+.suporte-manual textarea { box-sizing:border-box; width:100%; min-height:5rem; height:9rem; max-height:min(13rem,35vh); overflow:auto; resize:vertical; border-radius:8px; padding:8px; }

@@ -98,7 +98,7 @@ export function Documento({
           if (active && d) setPdf(d);
         })
         .catch((e) => {
-          if (active) setError(problema(e));
+          if (active) setError(problema(e, "Abrir PDF"));
         });
     return () => {
       active = false;
@@ -166,7 +166,7 @@ export function Documento({
       }
     })().catch((e) => {
       if (active && e.name !== "RenderingCancelledException")
-        setError(problema(e));
+        setError(problema(e, "Renderizar página do PDF"));
     });
     return () => {
       active = false;
@@ -180,7 +180,7 @@ export function Documento({
         lote.nome,
       );
     } catch (e) {
-      setError(problema(e));
+      setError(problema(e, "Baixar PDF"));
     }
   }
   if (!lote.paginas)

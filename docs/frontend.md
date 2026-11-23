@@ -45,3 +45,13 @@ A validação inicial passou em 13 testes no Edge. A rodada ampliada cobre o sel
 A consulta roda ao abrir, ao retornar à janela após um minuto e a cada cinco minutos de uso. Uma nova versão abre o aviso quando a tela está disponível. “Agora não” mantém a atualização ao lado dos direitos reservados. A ausência de conexão permite continuar trabalhando. O link de Lucas Andrade usa um ícone de link externo e mantém a identificação acessível do LinkedIn.
 
 Passaram 50 verificações no Edge, incluindo os dez PDFs do acervo e os avisos em claro e escuro. Há regressões para a publicação de uma atualização durante o uso, adiamento, falha de download e nova tentativa. O teste do roteiro sem lotes permite a consulta de versão e continua verificando que o passeio não grava dados. [Instalador e ensaio de troca de versão](../distribuicao/README.md)
+
+### Suporte e atualização na versão 2.0.1
+
+O ícone da prancheta no cabeçalho copia um relatório para colar na conversa de suporte. Ele indica a versão da interface e do serviço, a tela, a operação e o campo em revisão, a última falha e até 18 eventos da aba. Em erros de validação do serviço, inclui também a mensagem e o ponto do código. A cópia manual continua disponível quando o navegador bloqueia a área de transferência. A pessoa escolhe com quem compartilhar.
+
+O relatório cobre todas as operações do lote, mesmo com busca ou paginação ativa. Cada uma traz NF, página, CT-e quando identificado, pendências com motivo, verificações atendidas pelas regras locais e nomes dos campos corrigidos. O resumo separa quantidade de operações, operações em revisão e quantidade de pendências. A verificação de documento mostra a quantidade de dígitos e a presença de letras. Textos livres de comprovantes e identificações pessoais ficam no banco local.
+
+Na amostra de janeiro com nove páginas, a comparação do texto copiado com a resposta do serviço encontrou as 21 ocorrências nas operações corretas, inclusive as operações que acumulavam dois campos pendentes. Cada uma das 21 operações tinha o detalhamento das verificações atendidas.
+
+Na janela de atualização, o ícone e o título identificam a situação, o número instalado ocupa uma linha própria e os botões ficam no rodapé. A regressão mede o recuo do conteúdo, a centralização do ícone e a distância até as ações nos temas claro e escuro.

@@ -14,6 +14,8 @@ Em 23/11/2026 foi publicada a primeira versão Windows. O MSI foi baixado sem au
 
 ## Evidência e pendências
 
+Na versão 2.0.1, o suporte recebe a conferência de cada operação do lote e os erros técnicos da sessão. O texto copiado no Edge foi comparado com as 21 pendências de um lote de janeiro. A janela de atualização foi conferida nos dois temas. O MSI usa a folha dobrada como ícone e foi testado com a aplicação da 2.0.0, verificando o conteúdo dos arquivos instalados, a versão em execução e a preservação do lote. [Regressões do suporte e do instalador](docs/regressoes-backend.md)
+
 A rodada de 23/11/2026 verificou a edição e a gravação dos 44 campos em lote de teste, os 21 atalhos de pendência de Castro nos dois temas e a escolha das 19 filiais pelo CNPJ. [Detalhes da validação no painel lateral](docs/validacao-acervo.md)
 
 - **V2.** A validação cobre as quatro telas, a renderização dos nove relatórios reais e a recusa do documento alheio ao frete. O backend passou em 37 testes Java, 5 Python e no teste de troca do JAR. [Resultado por arquivo e regressões de interface](docs/validacao-acervo.md). O Java reproduziu os três TXTs de referência a partir dos campos históricos. A NF 66 de Curitiba e a NF 18103 têm proteções específicas. [Resultados e regressões](docs/regressoes-backend.md)

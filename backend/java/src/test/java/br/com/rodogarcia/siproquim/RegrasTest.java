@@ -50,6 +50,16 @@ class RegrasTest {
   }
 
   @Test
+  void diagnosticoInformaOsCamposRealmenteAvaliadosNaOperacao() {
+    var avaliacao = regras.avaliar(PERIODO, List.of(exemplo().corrigir(Map.of("recebedor", "CARIMBO"))));
+    var campos = avaliacao.camposAvaliados().get(1);
+    assertEquals(List.of("recebedor"), avaliacao.pendencias().stream().map(Pendencia::campo).toList());
+    assertTrue(campos.containsAll(List.of("recebedor", "nf", "dataNf", "destinoDoc", "cte", "dataEntrega")));
+    assertFalse(campos.contains("pais"));
+    assertFalse(campos.contains("municipalConfirmado"));
+  }
+
+  @Test
   void cpfComZeroOriginalMantemOnzeDigitosETresEspacos() {
     // CPF de teste calculado sobre a base fictícia 012345678.
     Operacao op = exemplo().corrigir(Map.of("destinoDoc", "012.345.678-90"));

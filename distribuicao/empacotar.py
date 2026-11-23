@@ -8,7 +8,7 @@ import tempfile
 import uuid
 import zipfile
 from pathlib import Path
-from msilib import CAB, PID_WORDCOUNT, add_data, init_database, schema, sequence
+from msilib import Binary, CAB, PID_WORDCOUNT, add_data, init_database, schema, sequence
 
 RAIZ = Path(__file__).resolve().parents[1]
 NOME = "SIPROQUIM Rodogarcia"
@@ -57,17 +57,18 @@ def compilar_atalho(pasta, versao):
     info.write_text('[assembly: System.Reflection.AssemblyVersion("' + versao + '.0")]', encoding="utf-8")
     csc = Path(os.environ["WINDIR"]) / "Microsoft.NET/Framework64/v4.0.30319/csc.exe"
     subprocess.run([str(csc), "/nologo", "/target:winexe", "/platform:x64", "/utf8output", "/codepage:65001",
+                    "/win32icon:" + str(RAIZ / "distribuicao/siproquim.ico"),
                     "/r:System.Windows.Forms.dll", "/r:System.IO.Compression.FileSystem.dll",
                     "/out:" + str(pasta / "Siproquim.exe"), str(info), str(RAIZ / "distribuicao/Iniciar.cs")], check=True)
 
 
 def montar_msi(pasta, saida, versao=VERSAO, familia=FAMILIA, nome=NOME):
-    compilar_atalho(pasta, versao)
     db = init_database(str(saida), schema, nome, guid(familia, versao), versao, "Rodogarcia")
     info = db.GetSummaryInformation(1)
     info.SetProperty(PID_WORDCOUNT, 10)  # arquivos comprimidos, instalação por usuário
     info.Persist()
     add_data(db, "Property", [("UpgradeCode", familia), ("ARPNOMODIFY", "1"), ("LIMITUI", "1"),
+                              ("ARPPRODUCTICON", "siproquim.ico"),
                               ("SecureCustomProperties", "ANTERIOR;MAISNOVO")])
     add_data(db, "Upgrade", [(familia, None, versao, None, 0, None, "ANTERIOR"),
                              (familia, versao, None, None, 2, None, "MAISNOVO")])
@@ -92,10 +93,13 @@ def montar_msi(pasta, saida, versao=VERSAO, familia=FAMILIA, nome=NOME):
     for id_, arquivo in [("Iniciar", "Siproquim.exe"), ("Pacote", "sistema.zip")]:
         src = pasta / arquivo
         numero, _ = cab.append(str(src), arquivo, id_)
-        add_data(db, "File", [(id_, "Programa", arquivo, src.stat().st_size, None, None, 512, numero)])
+        # O MSI decide a substituição do ZIP pela versão do executável que o acompanha.
+        versao_arquivo = versao + ".0" if id_ == "Iniciar" else "Iniciar"
+        add_data(db, "File", [(id_, "Programa", arquivo, src.stat().st_size, versao_arquivo, None, 512, numero)])
+    add_data(db, "Icon", [("siproquim.ico", Binary(str(RAIZ / "distribuicao/siproquim.ico")))])
     for id_, onde in [("Inicio", "ProgramMenuFolder"), ("Mesa", "DesktopFolder")]:
         add_data(db, "Shortcut", [(id_, onde, "SIPROQ|"+nome, "Programa", "[#Iniciar]", None,
-                                   nome, None, None, None, 1, "INSTALLDIR")])
+                                   nome, None, "siproquim.ico", 0, 1, "INSTALLDIR")])
     db.Commit()
     cab.commit(db)
     del db
@@ -114,6 +118,7 @@ if __name__ == "__main__":
     with tempfile.TemporaryDirectory(prefix="siproquim-build-", ignore_cleanup_errors=True) as temp:
         pasta = Path(temp)
         montar_zip(pasta)
+        compilar_atalho(pasta, VERSAO)
         montar_msi(pasta, pasta / MSI)
         os.replace(pasta / MSI, destino / MSI)
     print(destino / MSI)

@@ -12,6 +12,7 @@ import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
 import { Selector } from "@astryxdesign/core/Selector";
 import { FieldLabel } from "@astryxdesign/core/Field";
 import { cnpjFormatado } from "./api";
+import { registrarErroLocal } from "./diagnostico";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { Banner } from "@astryxdesign/core/Banner";
 import { VisuallyHidden } from "@astryxdesign/core/VisuallyHidden";
@@ -165,6 +166,7 @@ export function ImportForm({
       .then((inicio) => {
         if (!atual) return;
         if (!inicio.includes("%PDF-")) {
+          registrarErroLocal(new Error("Arquivo selecionado com formato incompatível."), "Importar PDF");
           setLeitura({
             arquivo: file,
             erro: "Escolha um PDF do relatório de fretes. O arquivo selecionado tem outro formato.",
@@ -174,12 +176,14 @@ export function ImportForm({
         url = URL.createObjectURL(file.slice(0, file.size, "application/pdf"));
         setLeitura({ arquivo: file, url });
       })
-      .catch(() => {
-        if (atual)
+      .catch((erro) => {
+        if (atual) {
+          registrarErroLocal(erro, "Ler arquivo selecionado");
           setLeitura({
             arquivo: file,
             erro: "Não foi possível ler o arquivo. Escolha o PDF novamente.",
           });
+        }
       });
     return () => {
       atual = false;

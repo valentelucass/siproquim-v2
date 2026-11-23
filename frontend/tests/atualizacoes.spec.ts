@@ -13,6 +13,7 @@ for (const tema of ["dark", "light"] as const) {
     await page.goto("/");
     const modal = page.getByRole("dialog", {name: "Atualização disponível"});
     await expect(modal).toBeVisible();
+    await expect(modal.locator(".update-version")).toContainText("2.0.0");
     await modal.getByRole("button", {name: "Agora não"}).click();
     await expect(modal).toHaveCount(0);
     const footer = page.getByRole("contentinfo").or(page.locator("footer")).first();

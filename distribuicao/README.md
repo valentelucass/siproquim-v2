@@ -22,4 +22,8 @@ $msi = "release/v$versao/Siproquim-Rodogarcia-x64.msi"
 
 O publicador assina a versão e o hash SHA-256 do pacote com RSA. A chave pública acompanha o backend. A chave privada fica no provedor CNG do usuário Windows que criou o canal. Para continuar publicando neste canal, use esse perfil e a mesma chave. A perda dessa chave exige distribuir uma versão de transição por instalação manual com uma nova âncora de confiança. O MSI atual não tem certificado de editor Windows (Authenticode).
 
-O teste instala dois pacotes de uma família MSI temporária, abre a interface, importa um PDF com o Python distribuído e confere os dados pela API depois da troca de versão. Ele simula a versão anterior com o mesmo esquema de banco. A validação de migrações futuras deve incluir uma base criada pela release anterior.
+O teste instala dois pacotes de uma família MSI temporária, abre a interface, importa um PDF com o Python distribuído e compara o lote pela API depois da troca de versão. Acrescente `--anterior release/v2.0.0/Siproquim-Rodogarcia-x64.msi` ao comando de teste para criar esse lote com a aplicação e os runtimes da versão publicada. Quando o argumento é omitido, o ensaio simula a versão anterior com o esquema atual.
+
+O desenho da folha dobrada fica em `siproquim.svg`. O Windows usa as resoluções de `siproquim.ico` no executável, no menu Iniciar, na área de trabalho e em Aplicativos instalados.
+
+Na tabela `File` do MSI, o iniciador tem versão numérica e o ZIP acompanha a versão do iniciador. O teste confere os dois arquivos em disco e a versão do serviço aberto pelo atalho após cada instalação.

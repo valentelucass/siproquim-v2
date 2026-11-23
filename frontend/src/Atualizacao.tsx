@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Download, RefreshCw } from "lucide-react";
+import { CircleAlert, CircleCheck, Download, RefreshCw } from "lucide-react";
 import { Tooltip } from "@astryxdesign/core/Tooltip";
 import { Btn, Modal } from "./Forms";
 import { ler } from "./api";
+import { registrarVersaoApi } from "./diagnostico";
 import { version } from "../package.json";
 
 export function Atualizacao({ ocupado }: { ocupado: boolean }) {
+  const [instalada, setInstalada] = useState(version);
   const [disponivel, setDisponivel] = useState("");
   const [aberto, abrir] = useState(false);
   const [checando, checar] = useState(false);
   const [instalando, instalar] = useState(false);
   const [mensagem, informar] = useState("");
+  const [falhou, setFalhou] = useState(false);
   const anunciado = useRef("");
   const consultando = useRef(false);
   const consultaManual = useRef(false);
@@ -24,15 +27,26 @@ export function Atualizacao({ ocupado }: { ocupado: boolean }) {
     checar(true);
     ultima.current = Date.now();
     try {
-      const estado = await ler<{disponivel: string | null}>("/atualizacoes");
+      const estado = await ler<{instalada: string; disponivel: string | null}>("/atualizacoes");
+      if (estado.instalada) {
+        setInstalada(estado.instalada);
+        registrarVersaoApi(estado.instalada);
+      }
       setDisponivel(estado.disponivel || "");
+      if (!estado.disponivel || consultaManual.current || estado.disponivel !== anunciado.current) {
+        setFalhou(false);
+        informar("");
+      }
       if (estado.disponivel && estado.disponivel !== anunciado.current) {
         anunciado.current = estado.disponivel;
         informar("");
         abrir(true);
       } else if (consultaManual.current) informar(estado.disponivel ? "" : "Você já está usando a versão mais recente.");
     } catch {
-      if (consultaManual.current) informar("Não foi possível consultar as atualizações. Confira sua conexão e tente novamente.");
+      if (consultaManual.current) {
+        setFalhou(true);
+        informar("Não foi possível consultar as atualizações. Confira sua conexão e tente novamente.");
+      }
     } finally {
       consultando.current = false;
       consultaManual.current = false;
@@ -57,12 +71,14 @@ export function Atualizacao({ ocupado }: { ocupado: boolean }) {
     if (emDownload.current) return;
     emDownload.current = true;
     instalar(true);
+    setFalhou(false);
     informar("");
     try {
       const r = await ler<{caminho: string; iniciado: boolean}>("/atualizacoes/" + disponivel, {method: "POST"});
       informar(r.iniciado ? "O instalador foi aberto. Ao concluir, o SIPROQUIM volta a abrir. Você também pode usar o atalho."
         : "Instalador verificado. Abra o arquivo em " + r.caminho);
     } catch (e) {
+      setFalhou(true);
       informar(e instanceof Error ? e.message : "O download falhou. Tente novamente.");
     } finally {
       emDownload.current = false;
@@ -70,20 +86,31 @@ export function Atualizacao({ ocupado }: { ocupado: boolean }) {
     }
   }
 
+  const ocupadoAgora = instalando || checando;
+  const tituloEstado = instalando ? "Preparando o instalador" : checando ? "Consultando a versão"
+    : falhou ? "Atenção à atualização" : disponivel ? "Nova versão " + disponivel : "Sistema atualizado";
+  const Icone = ocupadoAgora ? RefreshCw : falhou ? CircleAlert : disponivel ? Download : CircleCheck;
   return <>
     <Tooltip content={disponivel ? "Abrir a atualização disponível" : "Verificar se há uma nova versão do sistema"}>
       <button className={"versao-app" + (disponivel ? " disponivel" : "")}
         onClick={() => { abrir(true); if (!disponivel) { informar(""); void consultar(true); } }}>
         {disponivel ? <Download size={14} /> : <RefreshCw size={13} />}
-        {disponivel ? "Atualizar para " + disponivel : "Versão " + version}
+        {disponivel ? "Atualizar para " + disponivel : "Versão " + instalada}
       </button>
     </Tooltip>
     {aberto && !ocupado && <Modal titulo={disponivel ? "Atualização disponível" : "Atualizações do sistema"} close={() => !instalando && abrir(false)}>
-      <div className="modalform">
-        <p>{disponivel ? `A versão ${disponivel} está disponível. Você está usando a ${version}.` : "Versão instalada " + version + "."}</p>
-        {disponivel && <p>Salve a correção que estiver digitando antes de atualizar. Os lotes e o histórico ficam no computador.</p>}
-        <p role="status" hidden={!mensagem && !instalando && !checando}>{instalando ? "Baixando e verificando o instalador…" : mensagem || "Consultando a versão publicada…"}</p>
-        <div className="actions">
+      <div className="update-dialog">
+        <div className="update-body">
+          <div className="update-status" role="status">
+            <span className="update-icon" data-tom={falhou ? "aviso" : disponivel || ocupadoAgora ? "info" : "ok"}>
+              <Icone size={22} aria-hidden="true" />
+            </span>
+            <div><strong>{tituloEstado}</strong><p>{instalando ? "Baixando e verificando o instalador…" : checando ? "Procurando a última versão publicada…" : mensagem ||
+              (disponivel ? "Salve a correção que estiver digitando antes de atualizar. Seus lotes e o histórico ficam no computador." : "Você já está usando a versão mais recente.")}</p></div>
+          </div>
+          <div className="update-version"><span>Versão instalada</span><strong>{instalada}</strong></div>
+        </div>
+        <div className="actions update-actions">
           <Btn label={disponivel ? "Agora não" : "Fechar"} variant="ghost" onClick={() => abrir(false)} isDisabled={instalando} />
           {disponivel ? <Btn label="Atualizar agora" icon={<Download size={16}/>} onClick={baixar} isDisabled={instalando} />
             : <Btn label="Verificar novamente" onClick={() => void consultar(true)} isDisabled={checando} />}

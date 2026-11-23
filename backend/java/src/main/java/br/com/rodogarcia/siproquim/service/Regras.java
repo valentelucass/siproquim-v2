@@ -88,8 +88,15 @@ public class Regras {
   }
 
   public List<Pendencia> conferir(String periodo, List<Operacao> ops) {
+    return avaliar(periodo, ops).pendencias();
+  }
+
+  public record Avaliacao(List<Pendencia> pendencias, Map<Integer, Set<String>> camposAvaliados) {}
+
+  public Avaliacao avaliar(String periodo, List<Operacao> ops) {
     competencia(periodo);
     var pendencias = new ArrayList<Pendencia>();
+    var camposAvaliados = new HashMap<Integer, Set<String>>();
     var indices = new HashMap<String, Operacao>();
     var ocorrencias = new HashMap<List<String>, Integer>();
     var conhecimentos = new HashSet<List<String>>();
@@ -102,7 +109,9 @@ public class Regras {
       }
     }
     for (Operacao o : ops) {
-      var c = new Checagem(o, pendencias);
+      var campos = new LinkedHashSet<String>();
+      camposAvaliados.put(o.id(), campos);
+      var c = new Checagem(o, pendencias, campos);
       if (!o.valor("duplicataDe").isEmpty()) {
         Operacao alvo = indices.get(o.valor("duplicataDe"));
         c.exigir(
@@ -159,7 +168,7 @@ public class Regras {
             c.exigir(false, "tipo", "Confirme se a operação é nacional, importação ou exportação.");
       }
     }
-    return List.copyOf(pendencias);
+    return new Avaliacao(List.copyOf(pendencias), Map.copyOf(camposAvaliados));
   }
 
   private static List<String> chaveNota(Operacao o) {
@@ -252,8 +261,9 @@ public class Regras {
     c.local("armazenamento");
   }
 
-  private record Checagem(Operacao op, List<Pendencia> falhas) {
+  private record Checagem(Operacao op, List<Pendencia> falhas, Set<String> camposAvaliados) {
     void exigir(boolean ok, String campo, String motivo) {
+      camposAvaliados.add(campo);
       if (!ok) falhas.add(new Pendencia(op.id(), op.valor("nf"), campo, motivo));
     }
 

@@ -92,6 +92,20 @@ if (pasta) {
         });
         expect(detalhe.ok()).toBeTruthy();
         const { lote, pendencias }: Resultado = await detalhe.json();
+        if (id === "00000113") {
+          await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+          await expect(page.getByRole("dialog")).toHaveCount(0);
+          await page.getByRole("button", {name: "Copiar informações para o desenvolvedor"}).click();
+          const texto = await page.evaluate(() => navigator.clipboard.readText());
+          expect(pendencias).toHaveLength(21);
+          expect(texto.match(/^  A revisar:/gm)?.length).toBe(pendencias.length);
+          expect(texto.match(/^Op\. /gm)?.length).toBe(lote.operacoes.length);
+          expect(texto.match(/^  Verificações atendidas:/gm)?.length).toBe(lote.operacoes.length);
+          for (const p of pendencias) {
+            const bloco = texto.split("\nOp. " + p.operacao + " · ")[1]?.split("\nOp. ")[0] ?? "";
+            expect(bloco.includes("[" + p.campo + "]") && bloco.includes(p.motivo)).toBe(true);
+          }
+        }
         expect(lote.paginas).toBeGreaterThan(0);
         if (esperados[id]) expect(lote.paginas).toBe(esperados[id]);
         const cobertas = new Set(lote.operacoes.flatMap((o) => o.paginas));

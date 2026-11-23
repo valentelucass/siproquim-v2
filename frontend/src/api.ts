@@ -1,3 +1,5 @@
+import { registrarApi, registrarErroLocal } from "./diagnostico";
+
 export interface Operacao {
   id: number;
   paginas: number[];
@@ -31,6 +33,7 @@ export interface Resultado {
     tipo: string;
     situacao: string;
     modal: string;
+    camposAvaliados?: string[];
   }[];
 }
 export interface Evento {
@@ -50,13 +53,20 @@ export class ErroApi extends Error {
   }
 }
 export async function resposta(path: string, init: RequestInit = {}) {
+  const inicio = performance.now();
+  const metodo = init.method || "GET";
   const res = await fetch("/api" + path, {
     ...init,
     cache: "no-store",
     headers: { "X-Siproquim-UI": "local", ...init.headers },
+  }).catch((erro: unknown) => {
+    if (init.signal?.aborted) throw erro;
+    registrarApi(path, metodo, null, inicio);
+    throw new ErroApi(0, "O serviço local não respondeu. Tente novamente.");
   });
   if (!res.ok) {
     const e = await res.json().catch(() => null);
+    registrarApi(path, metodo, res, inicio, e);
     throw new ErroApi(
       res.status,
       e?.mensagem ||
@@ -65,6 +75,7 @@ export async function resposta(path: string, init: RequestInit = {}) {
           : "Não foi possível concluir a solicitação."),
     );
   }
+  registrarApi(path, metodo, res, inicio);
   return res;
 }
 export async function ler<T>(path: string, init?: RequestInit): Promise<T> {
@@ -252,7 +263,8 @@ export function instrucao(campo: string): string {
   }
   return "Confira este dado no documento do frete.";
 }
-export function problema(e: unknown) {
+export function problema(e: unknown, area = "Interface") {
+  if (!(e instanceof ErroApi)) registrarErroLocal(e, area);
   return e instanceof Error
     ? e.message
     : "Ocorreu um erro ao consultar o lote.";
