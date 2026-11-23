@@ -10,6 +10,8 @@ Em 22/11/2026, a V2 oferece conferência de fretes no navegador. A operadora pod
 | `frontend/` | React e TypeScript com componentes Meta Astryx, temas claro e escuro, prévia do PDF, seleção das 19 filiais da V1 e correções por campo. Arquivo e histórico dos lotes locais. O passo a passo destaca onde clicar na própria página. Usa o lote aberto quando há pendências editáveis e um exemplo em memória no primeiro acesso ou após a revisão. |
 | Distribuição | MSI por usuário com Java e Python incluídos. Uma nova versão assinalada no rodapé abre um modal. O aplicativo verifica a assinatura do manifesto e o SHA-256 antes de iniciar o instalador. A troca de versão foi testada com um lote gravado. [Distribuição](distribuicao/README.md) |
 
+Em 23/11/2026 foi publicada a primeira versão Windows. O MSI foi baixado sem autenticação pelo link do README. A aplicação em versão anterior de ensaio encontrou a 2.0.0 no canal público e verificou os mesmos bytes. A rodada passou em 50 testes no Edge, 39 Java, 5 Python e no ensaio do MSI. [Release v2.0.0](https://github.com/valentelucass/siproquim-v2/releases/tag/v2.0.0)
+
 ## Evidência e pendências
 
 A rodada de 23/11/2026 verificou a edição e a gravação dos 44 campos em lote de teste, os 21 atalhos de pendência de Castro nos dois temas e a escolha das 19 filiais pelo CNPJ. [Detalhes da validação no painel lateral](docs/validacao-acervo.md)
