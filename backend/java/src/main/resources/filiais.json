@@ -1,0 +1,97 @@
+[
+  {
+    "cnpj": "04547874000386",
+    "sigla": "AGU",
+    "empresa": "Dalga Logística"
+  },
+  {
+    "cnpj": "60960473001134",
+    "sigla": "AGU",
+    "empresa": "Rodogarcia"
+  },
+  {
+    "cnpj": "51863654000260",
+    "sigla": "AGU",
+    "empresa": "TR Rodogarcia"
+  },
+  {
+    "cnpj": "04547874000203",
+    "sigla": "CAS",
+    "empresa": "Dalga Logística"
+  },
+  {
+    "cnpj": "60960473000596",
+    "sigla": "CAS",
+    "empresa": "Rodogarcia"
+  },
+  {
+    "cnpj": "51863654000694",
+    "sigla": "CAS",
+    "empresa": "TR Rodogarcia"
+  },
+  {
+    "cnpj": "60960473000758",
+    "sigla": "CPQ",
+    "empresa": "Rodogarcia"
+  },
+  {
+    "cnpj": "51863654000341",
+    "sigla": "CPQ",
+    "empresa": "TR Rodogarcia"
+  },
+  {
+    "cnpj": "60960473000677",
+    "sigla": "CWB",
+    "empresa": "Rodogarcia"
+  },
+  {
+    "cnpj": "51863654000856",
+    "sigla": "CWB",
+    "empresa": "TR Rodogarcia"
+  },
+  {
+    "cnpj": "60960473001568",
+    "sigla": "NHB",
+    "empresa": "Rodogarcia"
+  },
+  {
+    "cnpj": "51863654000422",
+    "sigla": "NHB",
+    "empresa": "TR Rodogarcia"
+  },
+  {
+    "cnpj": "60960473000839",
+    "sigla": "REC",
+    "empresa": "Rodogarcia"
+  },
+  {
+    "cnpj": "51863654000503",
+    "sigla": "REC",
+    "empresa": "TR Rodogarcia"
+  },
+  {
+    "cnpj": "60960473001304",
+    "sigla": "RJR",
+    "empresa": "Rodogarcia"
+  },
+  {
+    "cnpj": "51863654000775",
+    "sigla": "RJR",
+    "empresa": "TR Rodogarcia"
+  },
+  {
+    "cnpj": "04547874000114",
+    "sigla": "SPO",
+    "empresa": "Dalga Logística"
+  },
+  {
+    "cnpj": "60960473000243",
+    "sigla": "SPO",
+    "empresa": "Rodogarcia"
+  },
+  {
+    "cnpj": "51863654000180",
+    "sigla": "SPO",
+    "empresa": "TR Rodogarcia"
+  }
+]

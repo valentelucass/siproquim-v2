@@ -1,0 +1,27 @@
+
+# local-ai-tools: dados privados e saídas locais
+**/.git/**
+**/.venv/**
+**/venv/**
+**/node_modules/**
+**/dist/**
+**/build/**
+**/target/**
+**/coverage/**
+**/__pycache__/**
+**/graphify-out/**
+**/.env
+**/.env.*
+**/*.dpapi
+**/*.sqlite
+**/*.sqlite3
+**/*.db
+**/auth-tokens/**
+backend/data/**
+database/**
+backend/docs/evidencias/**
+docs/evidence/**
+frontend/test-results/**
+frontend/playwright-report/**
+release/**
+docs/interno/**

@@ -1,0 +1,47 @@
+
+
+# Mapas e caches locais do Graphify
+graphify-out/
+database/*
+!database/README.md
+backend/java/target/
+backend/python/.venv/
+__pycache__/
+*.pyc
+frontend/node_modules/
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+
+# Estado local da estação e arquivos de trabalho
+.ai-memory.toml
+.env
+.env.*
+!.env.example
+*.token
+*.dpapi
+*.pem
+*.key
+*.pfx
+*.sqlite*
+*.db
+*.log
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+**/.pytest_cache/
+/build/
+/release/
+*.msi
+*.cab
+**/WhatsApp*/
+# Apenas PDFs públicos da PF e amostras sintéticas entram no repositório.
+*.pdf
+!docs/fontes-pf/**/*.pdf
+!frontend/public/fretes-demonstracao.pdf
+!backend/python/tests/frete-sintetico.pdf
+*.txt
+!**/requirements.txt
+!docs/fontes-pf/SHA256SUMS.txt
+/docs/interno/
