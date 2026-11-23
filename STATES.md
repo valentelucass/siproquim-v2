@@ -14,6 +14,8 @@ Em 23/11/2026 foi publicada a primeira versão Windows. O MSI foi baixado sem au
 
 ## Evidência e pendências
 
+Na 2.0.2, o MSI interativo abre a janela do SIPROQUIM para Windows. A janela usa WebView2 com perfil estável por usuário para preservar o tema. A prévia de desenvolvimento continua acessível na web. [Instalação e testes da janela](distribuicao/README.md)
+
 Na versão 2.0.1, o suporte recebe a conferência de cada operação do lote e os erros técnicos da sessão. O texto copiado no Edge foi comparado com as 21 pendências de um lote de janeiro. A janela de atualização foi conferida nos dois temas. O MSI usa a folha dobrada como ícone e foi testado com a aplicação da 2.0.0, verificando o conteúdo dos arquivos instalados, a versão em execução e a preservação do lote. [Regressões do suporte e do instalador](docs/regressoes-backend.md)
 
 A rodada de 23/11/2026 verificou a edição e a gravação dos 44 campos em lote de teste, os 21 atalhos de pendência de Castro nos dois temas e a escolha das 19 filiais pelo CNPJ. [Detalhes da validação no painel lateral](docs/validacao-acervo.md)

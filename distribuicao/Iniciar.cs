@@ -49,6 +49,10 @@ internal static class Iniciar {
         if (atual != Versao) {
             string dir = Extrair();
             if (atual != null) {
+                EventWaitHandle janela;
+                if (EventWaitHandle.TryOpenExisting(@"Local\Siproquim.Fechar." + Porta + "." + atual, out janela)) {
+                    using (janela) janela.Set();
+                }
                 Consultar("encerrar", true);
                 for (int i = 0; i < 60 && Consultar("versao", false) != null; i++) Thread.Sleep(250);
             }
@@ -62,7 +66,6 @@ internal static class Iniciar {
             java.EnvironmentVariables["SIPROQUIM_EXTRATOR"] = Path.Combine(dir, "extrair.py");
             java.EnvironmentVariables["SIPROQUIM_PYTHON"] = Path.Combine(dir, "python", "python.exe");
             java.EnvironmentVariables["SIPROQUIM_DESKTOP"] = "true";
-            java.EnvironmentVariables["SIPROQUIM_ATALHO"] = Assembly.GetExecutingAssembly().Location;
             java.EnvironmentVariables["SPRING_WEB_RESOURCES_STATIC_LOCATIONS"] = new Uri(Path.Combine(dir,"web") + Path.DirectorySeparatorChar).AbsoluteUri;
             java.EnvironmentVariables.Remove("SIPROQUIM_TOKEN");
             if (!String.IsNullOrEmpty(downloads))
@@ -76,8 +79,16 @@ internal static class Iniciar {
                     throw new IOException("O serviço local não iniciou na porta " + Porta + ".");
             }
         }
-        if (Environment.GetEnvironmentVariable("SIPROQUIM_SEM_NAVEGADOR") != "1")
-            Process.Start(new ProcessStartInfo(Url) { UseShellExecute = true });
+        if (Environment.GetEnvironmentVariable("SIPROQUIM_SEM_NAVEGADOR") != "1") {
+            string pasta = Path.Combine(Extrair(), "desktop");
+            var janela = new ProcessStartInfo(Path.Combine(pasta, "Siproquim.Desktop.exe")) {
+                WorkingDirectory = pasta, UseShellExecute = false
+            };
+            janela.EnvironmentVariables["SIPROQUIM_PERFIL"] = Perfil;
+            janela.EnvironmentVariables["SIPROQUIM_PORTA"] = Porta;
+            janela.EnvironmentVariables["SIPROQUIM_VERSAO"] = Versao;
+            using (Process.Start(janela)) { }
+        }
     }
     [STAThread] static int Main() {
         try {

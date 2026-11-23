@@ -1,5 +1,6 @@
 """Monta o MSI x64 por usuário com o Windows Installer nativo e o Python 3.12."""
 import json
+import hashlib
 import os
 import shutil
 import subprocess
@@ -8,6 +9,7 @@ import tempfile
 import uuid
 import zipfile
 from pathlib import Path
+from urllib.request import urlretrieve
 from msilib import Binary, CAB, PID_WORDCOUNT, add_data, init_database, schema, sequence
 
 RAIZ = Path(__file__).resolve().parents[1]
@@ -15,6 +17,9 @@ NOME = "SIPROQUIM Rodogarcia"
 FAMILIA = "{87E2ACF6-7506-4E0D-832F-B571F8C74FE9}"
 VERSAO = json.loads((RAIZ / "frontend/package.json").read_text(encoding="utf-8"))["version"]
 MSI = "Siproquim-Rodogarcia-x64.msi"
+SDK_WEBVIEW = "1.0.4370.26"
+SHA_SDK = "1c0dacac84b70109b3fd42f90c53a0ba942abc3a87590d7a4e0ccd86e4a06cf4"
+CSC = Path(os.environ["WINDIR"]) / "Microsoft.NET/Framework64/v4.0.30319/csc.exe"
 
 
 def guid(familia, nome):
@@ -31,7 +36,34 @@ def arvore(z, origem, destino, excluir=()):
             z.write(caminho, str(Path(destino) / caminho.relative_to(origem)))
 
 
+def montar_janela(pasta):
+    desktop = pasta / "desktop"
+    desktop.mkdir()
+    pacote = pasta / "webview2.nupkg"
+    urlretrieve(f"https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/{SDK_WEBVIEW}/microsoft.web.webview2.{SDK_WEBVIEW}.nupkg", pacote)
+    with pacote.open("rb") as f:
+        if hashlib.file_digest(f, "sha256").hexdigest() != SHA_SDK:
+            raise ValueError("O pacote do SDK WebView2 difere da versão fixada.")
+    with zipfile.ZipFile(pacote) as z:
+        for nome in ["lib/net462/Microsoft.Web.WebView2.WinForms.dll", "lib/net462/Microsoft.Web.WebView2.Core.dll",
+                     "build/native/x64/WebView2Loader.dll", "LICENSE.txt"]:
+            (desktop / Path(nome).name).write_bytes(z.read(nome))
+    bootstrap = desktop / "MicrosoftEdgeWebView2Setup.exe"
+    urlretrieve("https://go.microsoft.com/fwlink/p/?LinkId=2124703", bootstrap)
+    subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command",
+                    "$s=Get-AuthenticodeSignature -LiteralPath $env:SIPROQUIM_BOOTSTRAP; "
+                    "if ($s.Status -ne 'Valid' -or $s.SignerCertificate.GetNameInfo('SimpleName',$false) -ne 'Microsoft Corporation') {exit 1}"],
+                   env={**{k:v for k,v in os.environ.items() if k.upper() != "PSMODULEPATH"},
+                        "SIPROQUIM_BOOTSTRAP": str(bootstrap)}, check=True)
+    subprocess.run([str(CSC), "/nologo", "/target:winexe", "/platform:x64", "/codepage:65001",
+                    "/r:System.Windows.Forms.dll", "/r:System.Drawing.dll", "/r:Microsoft.Web.WebView2.Core.dll",
+                    "/r:Microsoft.Web.WebView2.WinForms.dll", "/win32icon:" + str(RAIZ/"distribuicao/siproquim.ico"),
+                    "/out:Siproquim.Desktop.exe", str(RAIZ/"distribuicao/Janela.cs")], cwd=desktop, check=True)
+    return desktop
+
+
 def montar_zip(pasta):
+    desktop = montar_janela(pasta)
     java = pasta / "java"
     subprocess.run(["jlink", "--add-modules", "java.se,jdk.unsupported,jdk.crypto.ec,jdk.zipfs",
                     "--strip-debug", "--no-header-files", "--no-man-pages", "--output", str(java)], check=True)
@@ -41,6 +73,7 @@ def montar_zip(pasta):
         raise RuntimeError("Execute o empacotador com o Python 3.12 do backend.")
     with zipfile.ZipFile(pasta / "sistema.zip", "w", zipfile.ZIP_DEFLATED, compresslevel=4) as z:
         arvore(z, java, "java")
+        arvore(z, desktop, "desktop")
         arvore(z, RAIZ / "frontend/dist", "web")
         z.write(RAIZ / "backend/java/target/siproquim-backend.jar", "sistema.jar")
         z.write(RAIZ / "backend/python/extrair.py", "extrair.py")
@@ -55,8 +88,7 @@ def montar_zip(pasta):
 def compilar_atalho(pasta, versao):
     info = pasta / "Versao.cs"
     info.write_text('[assembly: System.Reflection.AssemblyVersion("' + versao + '.0")]', encoding="utf-8")
-    csc = Path(os.environ["WINDIR"]) / "Microsoft.NET/Framework64/v4.0.30319/csc.exe"
-    subprocess.run([str(csc), "/nologo", "/target:winexe", "/platform:x64", "/utf8output", "/codepage:65001",
+    subprocess.run([str(CSC), "/nologo", "/target:winexe", "/platform:x64", "/utf8output", "/codepage:65001",
                     "/win32icon:" + str(RAIZ / "distribuicao/siproquim.ico"),
                     "/r:System.Windows.Forms.dll", "/r:System.IO.Compression.FileSystem.dll",
                     "/out:" + str(pasta / "Siproquim.exe"), str(info), str(RAIZ / "distribuicao/Iniciar.cs")], check=True)
@@ -76,6 +108,9 @@ def montar_msi(pasta, saida, versao=VERSAO, familia=FAMILIA, nome=NOME):
     # Remoção da versão anterior dentro da transação, com rollback em caso de falha.
     execucao = [(a, c, 1501 if a == "RemoveExistingProducts" else 700 if a == "LaunchConditions" else n)
                 for a, c, n in sequence.InstallExecuteSequence]
+    # EXE instalado, assíncrono e sem espera. Só abre após a instalação interativa bem-sucedida.
+    add_data(db, "CustomAction", [("AbrirSiproquim", 18 + 192, "Iniciar", None)])
+    execucao.append(("AbrirSiproquim", "NOT Installed AND NOT REMOVE AND UILevel >= 3", 6701))
     add_data(db, "InstallExecuteSequence", execucao)
     add_data(db, "AdminExecuteSequence", sequence.AdminExecuteSequence)
     add_data(db, "AdminUISequence", [(a, c, n) for a, c, n in sequence.AdminUISequence if n > 0])

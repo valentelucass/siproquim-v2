@@ -79,8 +79,9 @@ def validar(msi, anterior=None):
         url = f"http://127.0.0.1:{porta}"
         perfil = base / "perfil"
         env = dict(os.environ, SIPROQUIM_PERFIL=str(perfil), SIPROQUIM_PORTA=str(porta), SIPROQUIM_SEM_NAVEGADOR="1")
-        for key in ["SIPROQUIM_TOKEN", "SIPROQUIM_CANAL", "SIPROQUIM_DADOS"]:
+        for key in ["SIPROQUIM_TOKEN", "SIPROQUIM_DADOS"]:
             env.pop(key, None)
+        env["SIPROQUIM_CANAL"] = url + "/canal-de-ensaio"
         def api(rota, *, dados=None, headers=None):
             req = Request(url + rota, dados, {"X-Siproquim-UI": "local", **(headers or {})})
             with urlopen(req, timeout=15) as res:
@@ -103,6 +104,8 @@ def validar(msi, anterior=None):
             windows_installer("/a", anterior, "TARGETDIR=" + str(base / "anterior"))
             anterior_zip, = (base / "anterior").rglob("sistema.zip")
         versoes = [anterior_versao, VERSAO]
+        with zipfile.ZipFile(anterior_zip) as z:
+            anterior_com_janela = "desktop/Siproquim.Desktop.exe" in z.namelist()
         instalados = []
         destino = base / "instalado"
         try:
@@ -154,12 +157,18 @@ def validar(msi, anterior=None):
                     resultado = json.loads(api("/api/lotes", dados=corpo, headers={"Content-Type":"multipart/form-data; boundary="+borda}))
                     lote = resultado["lote"]["id"]
                     assert resultado["lote"]["paginas"] == 6 and resultado["pendencias"]
+                    if anterior_com_janela:
+                        subprocess.run(["node", str(RAIZ / "distribuicao/testar_janela.cjs"),
+                                        str(destino / "Siproquim.exe"), v, "preparar"], env=env, check=True, timeout=100)
                 else:
                     reaberto = json.loads(api("/api/lotes/"+lote))
                     for antes, depois in zip(resultado["decisoes"], reaberto["decisoes"], strict=True):
                         if "camposAvaliados" not in antes:
                             assert depois.pop("camposAvaliados"), "Decisão sem rastreio das regras desta versão"
                     assert reaberto == resultado, "O lote mudou durante a atualização."
+                    subprocess.run(["node", str(RAIZ / "distribuicao/testar_janela.cjs"),
+                                    str(destino / "Siproquim.exe"), v, "apos-atualizar" if anterior_com_janela else "abrir"],
+                                   env=env, check=True, timeout=180)
                     print(f"MSI validado: ícone, atalhos, PDF de 6 páginas e lote preservado de {anterior_versao} para {v}.")
         finally:
             fechar()

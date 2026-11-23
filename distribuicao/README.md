@@ -14,6 +14,7 @@ O instalador tem nome fixo para que o botão do README continue válido a cada v
 $versao = (Get-Content frontend/package.json -Raw | ConvertFrom-Json).version
 $msi = "release/v$versao/Siproquim-Rodogarcia-x64.msi"
 & backend/python/.venv/Scripts/python.exe -B distribuicao/empacotar.py
+& backend/python/.venv/Scripts/python.exe -B distribuicao/testar_abertura.py
 & backend/python/.venv/Scripts/python.exe -B distribuicao/testar_msi.py $msi
 .\distribuicao\Assinar.ps1 -Instalador $msi -Versao $versao
 ```
@@ -27,3 +28,9 @@ O teste instala dois pacotes de uma família MSI temporária, abre a interface, 
 O desenho da folha dobrada fica em `siproquim.svg`. O Windows usa as resoluções de `siproquim.ico` no executável, no menu Iniciar, na área de trabalho e em Aplicativos instalados.
 
 Na tabela `File` do MSI, o iniciador tem versão numérica e o ZIP acompanha a versão do iniciador. O teste confere os dois arquivos em disco e a versão do serviço aberto pelo atalho após cada instalação.
+
+## Janela de desktop
+
+Desde a 2.0.2, a instalação interativa chama o iniciador após concluir a transação. O atalho abre a aplicação WinForms com WebView2. A janela serve o React pelo serviço Java local e usa o perfil `%LOCALAPPDATA%\Rodogarcia\Siproquim\janela` para manter a aparência e as preferências entre versões. O SDK fixado é conferido pelo SHA-256 na compilação. O pacote inclui o bootstrapper assinado da Microsoft para estações que precisem instalar o runtime Evergreen. [Distribuição do WebView2](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution)
+
+O ensaio de abertura verifica a instalação e a atualização interativas, o reparo, a remoção e a instalação silenciosa. O ensaio do MSI também usa o Playwright do frontend para interagir com a janela WebView2 instalada em um perfil de teste. A inspeção remota é habilitada apenas no processo do ensaio.

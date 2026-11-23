@@ -1,4 +1,6 @@
-# Conferência de fretes no navegador
+# Conferência de fretes
+
+O instalador abre uma janela de desktop com a mesma interface de conferência. O tema explícito fica no perfil do SIPROQUIM, que acompanha o usuário entre aberturas e atualizações. Na primeira entrada nesse perfil, a interface segue a preferência de cores do sistema. A prévia web de desenvolvimento usa o perfil do navegador onde foi aberta.
 
 Em PowerShell, na raiz da V2, use `.\scripts\Frontend.ps1 iniciar` e abra [Conferência de fretes](http://127.0.0.1:5173/). No Windows, o ambiente testado usa Node 24, pnpm 11, JDK 25, Python 3.12 e Edge. A instalação inicial das dependências requer internet. As páginas, fontes e visualização do PDF são servidas pela máquina.
 

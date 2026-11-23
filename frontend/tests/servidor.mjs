@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { mkdir, mkdtemp, rm, copyFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve, join } from "node:path";
+import { createServer } from "node:net";
 import { fileURLToPath } from "node:url";
 import { setTimeout as delay } from "node:timers/promises";
 const frontend = fileURLToPath(new URL("../", import.meta.url)),
@@ -12,11 +13,15 @@ const temp =
 if (process.env.SIPROQUIM_UI_PASTA) await mkdir(temp);
 const jar = join(temp, "backend.jar");
 await copyFile(resolve(root, "backend/java/target/siproquim-backend.jar"), jar);
+const reserva = createServer();
+await new Promise((ok, falha) => reserva.once("error", falha).listen(0, "127.0.0.1", ok));
+const porta = reserva.address().port;
+await new Promise((ok) => reserva.close(ok));
 const env = {
   ...process.env,
   SIPROQUIM_DOWNLOADS: join(temp, "Downloads"),
   SIPROQUIM_DADOS: join(temp, "real"),
-  SIPROQUIM_PORTA: "18765",
+  SIPROQUIM_PORTA: String(porta),
   SIPROQUIM_PYTHON:
     process.env.SIPROQUIM_PYTHON ||
     resolve(

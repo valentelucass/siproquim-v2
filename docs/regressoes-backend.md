@@ -41,6 +41,12 @@ A amostra de duas notas de Agudos continua indisponível. Importação internaci
 
 ## Distribuição para Windows
 
+Na 2.0.1, concluir uma instalação manual deixava o aplicativo fechado. O ensaio com o Windows Installer reproduziu zero aberturas após a instalação. Na 2.0.2, o MSI chama o iniciador depois de concluir a instalação ou atualização interativa. O ensaio conta uma chamada em cada caso e confere também o reparo, a remoção e a instalação silenciosa.
+
+O teste do aplicativo instalado abre a janela WebView2 pelo executável do Windows, troca o tema pelo botão do cabeçalho e verifica a escolha depois de fechar e abrir de novo. Um novo clique no iniciador deve ativar a janela existente. O ensaio com a 2.0.1 publicada reabre o lote criado pela versão anterior. Dois pacotes de ensaio com janela própria permitem verificar também a conservação da escolha de tema durante a atualização.
+
+No primeiro ensaio da barra de título, o Windows informou modo claro mesmo com a interface em escuro. O React agora comunica a escolha à janela, que atualiza a barra e o texto pelo Desktop Window Manager. O teste consulta os atributos da janela nativa depois da troca e da reabertura. O modo de alto contraste mantém as cores de acessibilidade do Windows.
+
 Na versão 2.0.1 o ensaio confere todas as resoluções da folha dobrada no executável e a associação do ícone aos dois atalhos e à lista de aplicativos do Windows. A opção `--anterior` utiliza a aplicação e os runtimes extraídos do MSI publicado para criar o lote usado na comparação.
 
 Ao testar a troca da 2.0.0 para a 2.0.1 com conteúdos diferentes, o Windows manteve o iniciador anterior. A tabela de arquivos do MSI agora declara a versão do executável e associa o ZIP à mesma versão. O ensaio confere os bytes instalados dos dois arquivos, consulta a versão do serviço que o atalho abriu e depois compara os dados originais do lote.

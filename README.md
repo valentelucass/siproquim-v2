@@ -13,12 +13,12 @@ Aplicativo local da Rodogarcia para transformar relatórios de frete em TXT de t
 ## Instalar e começar
 
 1. Baixe e abra o instalador acima. Java e Python acompanham o aplicativo.
-2. Abra **SIPROQUIM Rodogarcia** no menu Iniciar ou na área de trabalho. A tela abre no navegador deste computador.
+2. Ao concluir a instalação, o **SIPROQUIM Rodogarcia** abre em uma janela própria do Windows. Nas próximas vezes, use o atalho da área de trabalho ou do menu Iniciar. O botão de sol ou lua altera a tela e a barra de título e guarda sua escolha para a próxima abertura.
 3. Clique em **Novo lote**, escolha a filial pelo CNPJ, indique a competência e selecione o PDF.
 4. Clique em uma pendência para abrir a página de origem. Confira o comprovante, escolha **Corrigir campo** e registre de onde veio a informação.
 5. Abra **Prévia do TXT**. Quando o lote estiver pronto, clique em **Exportar TXT**. O arquivo fica em **Downloads**. Importe-o no portal da PF e registre o resultado e o protocolo no sistema.
 
-O primeiro botão do cabeçalho abre um passo a passo na própria tela. [Guia da interface](docs/frontend.md) · [Fechamento mensal e recibo](docs/fechamento-mensal.md)
+Na primeira abertura da janela de desktop, o tema acompanha o Windows. Se você vinha da versão que abria no navegador, escolha o tema uma vez no aplicativo. O primeiro botão do cabeçalho abre um passo a passo. Se o Windows ainda precisar do componente Microsoft Edge WebView2, a primeira abertura usa internet para instalá-lo. [Guia da interface](docs/frontend.md) · [Fechamento mensal e recibo](docs/fechamento-mensal.md)
 
 ## Pedir ajuda
 

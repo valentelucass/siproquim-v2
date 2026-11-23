@@ -113,6 +113,10 @@ export default function App() {
       : "light",
   );
   const [viewAtual, go] = useState<View>("conferencia");
+  useEffect(() => {
+    const host = window as Window & { chrome?: { webview?: { postMessage: (value: string) => void } } };
+    host.chrome?.webview?.postMessage("tema:" + tema);
+  }, [tema]);
   const view = cena ? tipoCena[cena].view : viewAtual;
   const [loteAtual, setR] = useState<Resultado | null>(null),
     [lista, setLista] = useState<Resumo[]>([]),

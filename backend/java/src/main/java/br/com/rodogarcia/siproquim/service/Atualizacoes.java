@@ -105,14 +105,7 @@ public class Atualizacoes {
       Files.move(parte, pronto);
       if (desktop) {
         var msiexec = Path.of(System.getenv("SystemRoot"), "System32", "msiexec.exe");
-        var instalador = new ProcessBuilder(msiexec.toString(), "/i", pronto.toString()).start();
-        String atalho = System.getenv("SIPROQUIM_ATALHO");
-        if (atalho != null) instalador.onExit().thenAccept(processo -> {
-          if (processo.exitValue() == 0) {
-            try { new ProcessBuilder(atalho).start(); }
-            catch (IOException e) { System.getLogger("Siproquim").log(System.Logger.Level.WARNING, "Abra o aplicativo pelo atalho para concluir a atualização."); }
-          }
-        });
+        new ProcessBuilder(msiexec.toString(), "/i", pronto.toString()).start();
       }
       return new Instalacao(pronto.toString(), desktop);
     } catch (GeneralSecurityException erro) {
