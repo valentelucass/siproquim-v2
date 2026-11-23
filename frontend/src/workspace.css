@@ -1815,7 +1815,16 @@ textarea,
   border: 3px solid var(--cor-roteiro); border-radius: 9px;
   box-shadow: 0 0 0 1px light-dark(white,#161616);
 }
-.roteiro-formulario { width: min(100%, 650px); margin-inline: auto; padding: 16px; align-self: start; }
+#principal:has(> .roteiro-formulario) {
+  display: flex;
+  flex-direction: column;
+}
+.roteiro-formulario {
+  flex: none;
+  width: min(100%, 650px);
+  margin: auto;
+  padding: 16px;
+}
 .roteiro-formulario h2 { font-size: 1.1rem; padding: 0 0 10px; border-bottom: 1px solid var(--line); }
 .roteiro-formulario .actions { margin-top: 12px; }
 .rodape-versao, .versao-app { display: inline-flex; align-items: center; }

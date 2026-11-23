@@ -2,7 +2,7 @@ import { etapas } from "../src/roteiro";
 import { expect, test, type Page } from "@playwright/test";
 
 for (const tema of ["light", "dark"] as const) {
-  test(`rodapé fica no fim da janela nas etapas de formulário em ${tema}`, async ({ page }) => {
+  test(`formulários do roteiro ficam no centro e o rodapé permanece na base em ${tema}`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: tema });
     await page.route("**/api/lotes", route => route.fulfill({ json: [] }));
     await page.route("**/api/atualizacoes", route => route.fulfill({ json: { disponivel: null } }));
@@ -16,14 +16,27 @@ for (const tema of ["light", "dark"] as const) {
       ).toBeLessThanOrEqual(12);
     }
 
+    async function conferirFormularioCentralizado() {
+      await expect.poll(() => page.locator(".roteiro-formulario").evaluate(formulario => {
+        const painel = formulario.getBoundingClientRect();
+        const area = formulario.parentElement!.getBoundingClientRect();
+        return Math.max(
+          Math.abs((painel.left + painel.right - area.left - area.right) / 2),
+          Math.abs((painel.top + painel.bottom - area.top - area.bottom) / 2),
+        );
+      })).toBeLessThanOrEqual(5);
+    }
+
     await page.getByRole("button", { name: "Passo a passo", exact: true }).click();
     const guia = page.getByRole("region", { name: "Passo a passo" });
     for (let n = 1; n <= etapas.length; n++) {
       const etapa = etapas[n - 1];
       await expect(guia.getByText(`Passo ${n} de ${etapas.length}`)).toBeVisible();
-      if (etapa.alvo === "[data-roteiro=criar]" || etapa.alvo === "[data-roteiro=exportar]") {
-        for (const largura of [1919, 615]) {
-          await page.setViewportSize({ width: largura, height: 1010 });
+      if (etapa.alvo === ".dropfile" || etapa.alvo === "[data-roteiro=criar]" ||
+          etapa.alvo === "[data-roteiro=exportar]") {
+        for (const [largura, altura] of [[1919, 1010], [1200, 770], [615, 1010]]) {
+          await page.setViewportSize({ width: largura, height: altura });
+          await conferirFormularioCentralizado();
           await conferirRodape();
           await conferirBalao(page);
         }
