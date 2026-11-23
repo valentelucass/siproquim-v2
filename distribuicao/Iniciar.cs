@@ -66,9 +66,12 @@ internal static class Iniciar {
             java.EnvironmentVariables["SIPROQUIM_EXTRATOR"] = Path.Combine(dir, "extrair.py");
             java.EnvironmentVariables["SIPROQUIM_PYTHON"] = Path.Combine(dir, "python", "python.exe");
             java.EnvironmentVariables["SIPROQUIM_DESKTOP"] = "true";
+            java.EnvironmentVariables["SIPROQUIM_ATALHO"] = Assembly.GetExecutingAssembly().Location;
+            java.EnvironmentVariables["SIPROQUIM_JANELA"] = Path.Combine(dir, "desktop", "Siproquim.Desktop.exe");
+            java.EnvironmentVariables["SIPROQUIM_VERSAO"] = Versao;
             java.EnvironmentVariables["SPRING_WEB_RESOURCES_STATIC_LOCATIONS"] = new Uri(Path.Combine(dir,"web") + Path.DirectorySeparatorChar).AbsoluteUri;
             java.EnvironmentVariables.Remove("SIPROQUIM_TOKEN");
-            if (!String.IsNullOrEmpty(downloads))
+            if (!String.IsNullOrEmpty(downloads) && String.IsNullOrEmpty(Environment.GetEnvironmentVariable("SIPROQUIM_DOWNLOADS")))
                 java.EnvironmentVariables["SIPROQUIM_DOWNLOADS"] = Environment.ExpandEnvironmentVariables(downloads);
             using (var processo = Process.Start(java)) {
                 for (int i = 0; i < 160 && !processo.HasExited; i++) {

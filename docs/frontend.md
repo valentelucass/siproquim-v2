@@ -45,7 +45,7 @@ A validação inicial passou em 13 testes no Edge. A rodada ampliada cobre o sel
 
 ## Atualização no rodapé · 23/11/2026
 
-Desde a 2.0.4, a consulta roda ao abrir, a cada 30 segundos com a janela visível e ao retornar depois desse intervalo. O botão de versão no rodapé força uma consulta ao canal mesmo quando o serviço ainda tem uma resposta em cache. Uma nova versão abre o aviso quando a tela está disponível. “Agora não” mantém a atualização ao lado dos direitos reservados. A ausência de conexão permite continuar trabalhando. O link de Lucas Andrade usa um ícone de link externo e mantém a identificação acessível do LinkedIn.
+Desde a 2.0.5, a consulta roda ao abrir, a cada 30 segundos com a janela visível e ao retornar depois desse intervalo. O botão de versão no rodapé força uma consulta ao canal mesmo quando o serviço ainda tem uma resposta em cache. Uma nova versão abre o aviso quando a tela está disponível. “Agora não” mantém a atualização ao lado dos direitos reservados. A ausência de conexão permite continuar trabalhando. O link de Lucas Andrade usa um ícone de link externo e mantém a identificação acessível do LinkedIn.
 
 Passaram 50 verificações no Edge, incluindo os dez PDFs do acervo e os avisos em claro e escuro. Há regressões para a publicação de uma atualização durante o uso, adiamento, falha de download e nova tentativa. O teste do roteiro sem lotes permite a consulta de versão e continua verificando que o passeio não grava dados. [Instalador e ensaio de troca de versão](../distribuicao/README.md)
 

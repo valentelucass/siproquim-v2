@@ -7,6 +7,7 @@ import java.nio.file.*;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
@@ -105,8 +106,7 @@ public class Atualizacoes {
       Path pronto = downloads.resolve("Siproquim-" + m.versao() + "-" + UUID.randomUUID().toString().substring(0,8) + ".msi");
       Files.move(parte, pronto);
       if (desktop) {
-        var msiexec = Path.of(System.getenv("SystemRoot"), "System32", "msiexec.exe");
-        new ProcessBuilder(msiexec.toString(), "/i", pronto.toString()).start();
+        instalarNoWindows(pronto);
       }
       return new Instalacao(pronto.toString(), desktop);
     } catch (GeneralSecurityException erro) {
@@ -115,6 +115,39 @@ public class Atualizacoes {
       throw new Falha(HttpStatus.SERVICE_UNAVAILABLE, "Falha ao preparar o instalador. Confira a conexão e a pasta Downloads.");
     } finally {
       if (parte != null) try { Files.deleteIfExists(parte); } catch (IOException ignorada) {}
+    }
+  }
+
+  private void instalarNoWindows(Path pacote) {
+    String atalho = System.getenv("SIPROQUIM_ATALHO");
+    String janela = System.getenv("SIPROQUIM_JANELA");
+    if (atalho == null || janela == null || !Files.isRegularFile(Path.of(atalho)) || !Files.isRegularFile(Path.of(janela)))
+      throw new Falha(HttpStatus.SERVICE_UNAVAILABLE, "Abra o SIPROQUIM pelo atalho do Windows e tente atualizar novamente.");
+    Path destino = Path.of(atalho).toAbsolutePath().getParent();
+    try {
+      var instalador = new ProcessBuilder(janela, "--instalar", pacote.toString(), destino.toString())
+          .redirectOutput(ProcessBuilder.Redirect.DISCARD)
+          .redirectError(ProcessBuilder.Redirect.DISCARD)
+          .start();
+      if (!instalador.waitFor(5, TimeUnit.MINUTES))
+        throw new Falha(HttpStatus.SERVICE_UNAVAILABLE, "O Windows ainda está instalando a atualização. Aguarde e abra o SIPROQUIM pelo atalho.");
+      int codigo = instalador.exitValue();
+      if (codigo == 1618)
+        throw Falha.conflito("O Windows está fazendo outra instalação. Quando ela terminar, tente atualizar novamente.");
+      if (codigo == 3010)
+        throw Falha.conflito("O Windows precisa ser reiniciado para concluir a atualização do SIPROQUIM.");
+      if (codigo != 0)
+        throw new Falha(HttpStatus.SERVICE_UNAVAILABLE, "O Windows não concluiu a atualização. Código " + codigo + ". Tente novamente.");
+    } catch (IOException erro) {
+      throw new Falha(HttpStatus.SERVICE_UNAVAILABLE, "O Windows não abriu o instalador. Tente novamente.");
+    } catch (InterruptedException erro) {
+      Thread.currentThread().interrupt();
+      throw new Falha(HttpStatus.SERVICE_UNAVAILABLE, "A consulta do instalador foi interrompida. Abra o SIPROQUIM pelo atalho.");
+    }
+    try {
+      new ProcessBuilder(atalho).start();
+    } catch (IOException erro) {
+      throw new Falha(HttpStatus.SERVICE_UNAVAILABLE, "A atualização foi instalada. Abra o SIPROQUIM novamente pelo atalho.");
     }
   }
 

@@ -24,6 +24,28 @@ async function testar() {
       {env, encoding:"utf8", windowsHide:true, timeout:20000}).trim();
   }
   const abrir = () => execFileSync(atalho, [], {env, stdio:"ignore", timeout:70000});
+  const lerPosicao = `Add-Type -Namespace Teste -Name Posicao -MemberDefinition '
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        public struct Rect { public int Left, Top, Right, Bottom; }
+        [System.Runtime.InteropServices.DllImport("user32.dll")] public static extern bool GetWindowRect(System.IntPtr h, out Rect r);
+        [System.Runtime.InteropServices.DllImport("user32.dll")] public static extern bool IsIconic(System.IntPtr h);
+        [System.Runtime.InteropServices.DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
+        [System.Runtime.InteropServices.DllImport("user32.dll")] public static extern bool SetWindowPos(System.IntPtr h, System.IntPtr ordem, int x, int y, int largura, int altura, int flags);
+        [System.Runtime.InteropServices.DllImport("user32.dll")] public static extern bool ShowWindowAsync(System.IntPtr h, int modo);'
+      $null=[Teste.Posicao]::SetProcessDPIAware()
+      Add-Type -AssemblyName System.Windows.Forms
+      if ($j.Count -ne 1) {throw 'Janela ausente ou duplicada'}
+      $h=$j[0].MainWindowHandle;`;
+  function posicaoDaJanela() {
+    return janela(lerPosicao + `
+      $r=New-Object 'Teste.Posicao+Rect'
+      $null=[Teste.Posicao]::GetWindowRect($h,[ref]$r)
+      $a=[Windows.Forms.Screen]::FromHandle($h).WorkingArea
+      $x=[math]::Abs($a.Left+$a.Right-$r.Left-$r.Right)
+      $y=[math]::Abs($a.Top+$a.Bottom-$r.Top-$r.Bottom)
+      if ((-not [Teste.Posicao]::IsIconic($h)) -and $x -le 20 -and $y -le 20) {Write-Output "Centralizada"}
+      else {Write-Output "Deslocamento de centro em dobro: $x,$y. Janela $($r.Left),$($r.Top),$($r.Right),$($r.Bottom). Área $a"}`);
+  }
   function conferirBarra(tema) {
     const valores = janela(`Add-Type -Name Dwm -Namespace Teste -MemberDefinition '[System.Runtime.InteropServices.DllImport("dwmapi.dll")] public static extern int DwmGetWindowAttribute(System.IntPtr janela, int atributo, out int valor, int tamanho);';
       if ($j.Count -ne 1) {throw 'Janela ausente'}
@@ -54,6 +76,8 @@ async function testar() {
       const pagina = contexto.pages().find(p => p.url().startsWith(app + "/"));
       const tela = pagina.locator(".app");
       await expect(tela).toBeVisible();
+      if (versao === require("../frontend/package.json").version)
+        await expect.poll(posicaoDaJanela, {message:"Posição na abertura"}).toBe("Centralizada");
       if (anterior) {
         await expect(tela).toHaveAttribute("data-mode", anterior);
         conferirBarra(anterior);
@@ -82,8 +106,16 @@ async function testar() {
         }
         await pagina.keyboard.press("Escape");
         await expect(guia).toHaveCount(0);
+        janela(lerPosicao + `
+          $r=New-Object 'Teste.Posicao+Rect'
+          $null=[Teste.Posicao]::GetWindowRect($h,[ref]$r)
+          if(-not [Teste.Posicao]::SetWindowPos($h,[IntPtr]::Zero,($r.Left+80),$r.Top,0,0,21)){throw 'Falha ao deslocar janela'}
+          if(-not [Teste.Posicao]::ShowWindowAsync($h,6)){throw 'Falha ao minimizar'}
+        `);
+        await expect.poll(() => janela(lerPosicao + "Write-Output ([Teste.Posicao]::IsIconic($h))")).toBe("True");
       }
       abrir();
+      if (!proximo) await expect.poll(posicaoDaJanela, {message:"Posição ao restaurar pelo atalho"}).toBe("Centralizada");
       await esperar(500);
       expect(janela("if ($j.Count -eq 1) { $j[0].MainWindowTitle }")).toBe("SIPROQUIM Rodogarcia");
     } finally {

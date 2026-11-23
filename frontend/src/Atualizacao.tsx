@@ -14,6 +14,7 @@ export function Atualizacao({ ocupado }: { ocupado: boolean }) {
   const [aberto, abrir] = useState(false);
   const [checando, checar] = useState(false);
   const [instalando, instalar] = useState(false);
+  const [reabrindo, setReabrindo] = useState(false);
   const [mensagem, informar] = useState("");
   const [falhou, setFalhou] = useState(false);
   const anunciado = useRef("");
@@ -86,7 +87,8 @@ export function Atualizacao({ ocupado }: { ocupado: boolean }) {
     informar("");
     try {
       const r = await ler<{caminho: string; iniciado: boolean}>("/atualizacoes/" + disponivel, {method: "POST"});
-      informar(r.iniciado ? "O instalador foi aberto. Ao concluir, o SIPROQUIM volta a abrir. Você também pode usar o atalho."
+      setReabrindo(r.iniciado);
+      informar(r.iniciado ? "Reabrindo o SIPROQUIM. Se a janela não abrir, use o atalho da área de trabalho."
         : "Instalador verificado. Abra o arquivo em " + r.caminho);
     } catch (e) {
       setFalhou(true);
@@ -97,8 +99,8 @@ export function Atualizacao({ ocupado }: { ocupado: boolean }) {
     }
   }
 
-  const ocupadoAgora = instalando || checando;
-  const tituloEstado = instalando ? "Preparando o instalador" : checando ? "Consultando a versão"
+  const ocupadoAgora = instalando || checando || reabrindo;
+  const tituloEstado = reabrindo ? "Atualização instalada" : instalando ? "Atualizando o SIPROQUIM" : checando ? "Consultando a versão"
     : falhou ? "Atenção à atualização" : disponivel ? "Nova versão " + disponivel : "Sistema atualizado";
   const Icone = ocupadoAgora ? RefreshCw : falhou ? CircleAlert : disponivel ? Download : CircleCheck;
   return <>
@@ -116,14 +118,14 @@ export function Atualizacao({ ocupado }: { ocupado: boolean }) {
             <span className="update-icon" data-tom={falhou ? "aviso" : disponivel || ocupadoAgora ? "info" : "ok"}>
               <Icone size={22} aria-hidden="true" />
             </span>
-            <div><strong>{tituloEstado}</strong><p>{instalando ? "Baixando e verificando o instalador…" : checando ? "Procurando a última versão publicada…" : mensagem ||
+            <div><strong>{tituloEstado}</strong><p>{instalando ? "Baixando, verificando e instalando a nova versão. Aguarde nesta janela." : checando ? "Procurando a última versão publicada…" : mensagem ||
               (disponivel ? "Salve a correção que estiver digitando antes de atualizar. Seus lotes e o histórico ficam no computador." : "Você já está usando a versão mais recente.")}</p></div>
           </div>
           <div className="update-version"><span>Versão instalada</span><strong>{instalada}</strong></div>
         </div>
         <div className="actions update-actions">
           <Btn label={disponivel ? "Agora não" : "Fechar"} variant="ghost" onClick={() => abrir(false)} isDisabled={instalando} />
-          {disponivel ? <Btn label="Atualizar agora" icon={<Download size={16}/>} onClick={baixar} isDisabled={instalando} />
+          {disponivel ? <Btn label="Atualizar agora" icon={<Download size={16}/>} onClick={baixar} isDisabled={instalando || reabrindo} />
             : <Btn label="Verificar novamente" onClick={() => void consultar(true)} isDisabled={checando} />}
         </div>
       </div>

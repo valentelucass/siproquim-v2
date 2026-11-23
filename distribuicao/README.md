@@ -45,3 +45,5 @@ Desde a 2.0.2, a instalação interativa chama o iniciador após concluir a tran
 O ensaio de abertura verifica a instalação e a atualização interativas, o reparo, a remoção e a instalação silenciosa. O ensaio do MSI também usa o Playwright do frontend para interagir com a janela WebView2 instalada em um perfil de teste. A inspeção remota é habilitada apenas no processo do ensaio.
 
 A janela abre o endereço local com a versão do executável. Isso evita reaproveitar o HTML de uma versão anterior que esteja no cache do WebView2. O ensaio atualiza a versão publicada, conserva o perfil e confere a posição do rodapé nas etapas Novo lote e Prévia do TXT.
+
+Para validar a instalação silenciosa iniciada pelo aplicativo, rode `testar_msi.py $msi --via-atualizador` com a chave CNG de publicação disponível. O teste assina um MSI de uma família temporária, serve o pacote pela rede local e espera o iniciador abrir a nova versão automaticamente. A janela abre centralizada. Se estiver minimizada ao clicar no atalho, ela volta ao centro do monitor.

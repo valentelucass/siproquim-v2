@@ -6,10 +6,13 @@ import os
 import shutil
 from pathlib import Path
 import ctypes
+from functools import partial
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import socket
 import struct
 import subprocess
 import tempfile
+from threading import Thread
 import time
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
@@ -21,7 +24,13 @@ from empacotar import MSI, RAIZ, VERSAO, compilar_atalho, montar_msi, guid
 
 def windows_installer(*args):
     executavel = Path(os.environ["WINDIR"]) / "System32/msiexec.exe"
-    subprocess.run([str(executavel), *map(str, args), "/qn", "/norestart"], check=True, timeout=180)
+    def argumento(valor):
+        chave, igual, dado = str(valor).partition("=")
+        if igual and chave in {"INSTALLDIR", "TARGETDIR", "DesktopFolder", "ProgramMenuFolder"}:
+            return f'{chave}="{dado}"'
+        return subprocess.list2cmdline([str(valor)])
+    cmd = " ".join(map(argumento, (executavel, *args, "/qn", "/norestart")))
+    subprocess.run(cmd, executable=executavel, check=True, timeout=180)
 
 
 def coluna_msi(msi, consulta):
@@ -59,7 +68,12 @@ def copiar_versoes_de_arquivo(origem, destino):
     db.Commit()
 
 
-def validar(msi, anterior=None):
+class CanalEnsaio(SimpleHTTPRequestHandler):
+    def log_message(self, format, *args):
+        pass
+
+
+def validar(msi, anterior=None, via_atualizador=False):
     familia = "{" + str(uuid.uuid4()).upper() + "}"
     nome = "SIPROQUIM Ensaio " + familia[1:9]
     with tempfile.TemporaryDirectory(prefix="siproquim-ensaio-", ignore_cleanup_errors=True) as temp:
@@ -78,13 +92,14 @@ def validar(msi, anterior=None):
             porta = s.getsockname()[1]
         url = f"http://127.0.0.1:{porta}"
         perfil = base / "perfil"
-        env = dict(os.environ, SIPROQUIM_PERFIL=str(perfil), SIPROQUIM_PORTA=str(porta), SIPROQUIM_SEM_NAVEGADOR="1")
+        env = dict(os.environ, SIPROQUIM_PERFIL=str(perfil), SIPROQUIM_PORTA=str(porta), SIPROQUIM_SEM_NAVEGADOR="1",
+                   SIPROQUIM_DOWNLOADS=str(base / "Downloads"))
         for key in ["SIPROQUIM_TOKEN", "SIPROQUIM_DADOS"]:
             env.pop(key, None)
         env["SIPROQUIM_CANAL"] = url + "/canal-de-ensaio"
-        def api(rota, *, dados=None, headers=None):
+        def api(rota, *, dados=None, headers=None, timeout=15):
             req = Request(url + rota, dados, {"X-Siproquim-UI": "local", **(headers or {})})
-            with urlopen(req, timeout=15) as res:
+            with urlopen(req, timeout=timeout) as res:
                 return res.read()
         def fechar():
             chave = perfil / "database/api.token"
@@ -107,7 +122,14 @@ def validar(msi, anterior=None):
         with zipfile.ZipFile(anterior_zip) as z:
             anterior_com_janela = "desktop/Siproquim.Desktop.exe" in z.namelist()
         instalados = []
-        destino = base / "instalado"
+        destino = base / "Instalação do ensaio"
+        canal = None
+        if via_atualizador:
+            pasta_canal = base / "canal"
+            pasta_canal.mkdir()
+            canal = ThreadingHTTPServer(("127.0.0.1", 0), partial(CanalEnsaio, directory=str(pasta_canal)))
+            Thread(target=canal.serve_forever, daemon=True).start()
+            env["SIPROQUIM_CANAL"] = f"http://127.0.0.1:{canal.server_port}"
         try:
             for v in versoes:
                 construcao = base / v
@@ -122,9 +144,38 @@ def validar(msi, anterior=None):
                 montar_msi(construcao, pacote, v, familia, nome)
                 if anterior and v == anterior_versao:
                     copiar_versoes_de_arquivo(anterior, pacote)
-                windows_installer("/i", pacote, "INSTALLDIR="+str(destino), "DesktopFolder="+str(base/"mesa"),
-                                  "ProgramMenuFolder="+str(base/"menu"), "/l*v", base/(v+".log"))
                 instalados.append(guid(familia, v))
+                real = via_atualizador and v == VERSAO
+                if real:
+                    publicar = pasta_canal / "download" / ("v" + v)
+                    publicar.mkdir(parents=True)
+                    os.link(pacote, publicar / MSI)
+                    subprocess.run(["pwsh", "-NoProfile", "-File", str(RAIZ / "distribuicao/Assinar.ps1"),
+                                    "-Instalador", str(publicar / MSI), "-Versao", v], check=True)
+                    ultimo = pasta_canal / "latest/download"
+                    ultimo.mkdir(parents=True)
+                    os.link(publicar / "atualizacao.json", ultimo / "atualizacao.json")
+                    assert json.loads(api("/api/atualizacoes?forcar=true"))["disponivel"] == v
+                    try:
+                        retorno = json.loads(api("/api/atualizacoes/" + v, dados=b"", timeout=180))
+                    except HTTPError as erro:
+                        raise AssertionError("Atualizador HTTP " + str(erro.code) + ": " +
+                                             erro.read(2048).decode("utf-8")) from erro
+                    assert retorno["iniciado"]
+                    limite = time.monotonic() + 40
+                    while time.monotonic() < limite:
+                        try:
+                            if api("/api/desktop/versao", headers={"X-Siproquim-Token": token}).decode() == v:
+                                break
+                        except OSError:
+                            pass
+                        time.sleep(.2)
+                    else:
+                        raise AssertionError("O atualizador não abriu a nova versão.")
+                    print("Atualização pelo aplicativo instalou e reabriu a nova versão.")
+                else:
+                    windows_installer("/i", pacote, "INSTALLDIR="+str(destino), "DesktopFolder="+str(base/"mesa"),
+                                      "ProgramMenuFolder="+str(base/"menu"), "/l*v", base/(v+".log"))
                 for arquivo in ["Siproquim.exe", "sistema.zip"]:
                     with (construcao / arquivo).open("rb") as novo, (destino / arquivo).open("rb") as instalado:
                         assert hashlib.file_digest(novo, "sha256").digest() == hashlib.file_digest(instalado, "sha256").digest(), f"{arquivo} instalado diverge da versão {v}."
@@ -138,7 +189,8 @@ def validar(msi, anterior=None):
                     env["SIPROQUIM_VERSAO"] = v  # simula uma instalação anterior com o mesmo esquema
                 else:
                     env.pop("SIPROQUIM_VERSAO", None)
-                subprocess.run([str(destino / "Siproquim.exe")], env=env, timeout=60, check=True)
+                if not real:
+                    subprocess.run([str(destino / "Siproquim.exe")], env=env, timeout=60, check=True)
                 token = (perfil / "database/api.token").read_text().strip()
                 em_execucao = api("/api/desktop/versao", headers={"X-Siproquim-Token": token}).decode()
                 assert em_execucao == v, f"Era esperado o backend {v}, mas o atalho abriu {em_execucao}."
@@ -172,6 +224,9 @@ def validar(msi, anterior=None):
                     print(f"MSI validado: ícone, atalhos, PDF de 6 páginas e lote preservado de {anterior_versao} para {v}.")
         finally:
             fechar()
+            if canal:
+                canal.shutdown()
+                canal.server_close()
             for produto in reversed(instalados):
                 proc = subprocess.run(["msiexec.exe", "/x", produto, "/qn", "/norestart"], timeout=90)
                 if proc.returncode not in (0,1605): raise RuntimeError("Falha na limpeza do produto de ensaio.")
@@ -182,5 +237,9 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("instalador", type=Path)
     p.add_argument("--anterior", type=Path, help="MSI da versão publicada que criará o lote inicial")
+    p.add_argument("--via-atualizador", action="store_true", help="Testa o atualizador com canal local assinado e MSI isolado")
     args = p.parse_args()
-    validar(args.instalador.resolve(strict=True), args.anterior.resolve(strict=True) if args.anterior else None)
+    if args.via_atualizador and args.anterior:
+        p.error("--via-atualizador simula a versão anterior com o atualizador desta compilação")
+    validar(args.instalador.resolve(strict=True), args.anterior.resolve(strict=True) if args.anterior else None,
+            args.via_atualizador)

@@ -44,9 +44,9 @@ internal sealed class Janela : Form {
         this.perfil = perfil;
         Text = Nome;
         Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
-        StartPosition = FormStartPosition.CenterScreen;
+        StartPosition = FormStartPosition.Manual;
         Size = new Size(1200, 800);
-        WindowState = FormWindowState.Maximized;
+        Centralizar(Screen.FromPoint(Cursor.Position).WorkingArea);
         pagina.Dock = DockStyle.Fill;
         Controls.Add(pagina);
         Shown += async (s, e) => {
@@ -61,11 +61,22 @@ internal sealed class Janela : Form {
         sinais.Tick += (s, e) => {
             if (fechar.WaitOne(0)) { Close(); return; }
             if (ativar.WaitOne(0)) {
-                if (WindowState == FormWindowState.Minimized) WindowState = FormWindowState.Normal;
+                if (WindowState == FormWindowState.Minimized) {
+                    var area = Screen.FromHandle(Handle).WorkingArea;
+                    WindowState = FormWindowState.Normal;
+                    Centralizar(area);
+                }
                 Activate();
             }
         };
         sinais.Start();
+    }
+
+    void Centralizar(Rectangle area) {
+        int largura = Math.Min(Width, area.Width);
+        int altura = Math.Min(Height, area.Height);
+        Bounds = new Rectangle(area.Left + (area.Width - largura) / 2,
+                               area.Top + (area.Height - altura) / 2, largura, altura);
     }
 
     protected override void Dispose(bool disposing) {
@@ -126,7 +137,22 @@ internal sealed class Janela : Form {
         web.Navigate(inicio.AbsoluteUri);
     }
 
-    [STAThread] static int Main() {
+    static int Instalar(string pacote, string destino) {
+        string msiexec = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "msiexec.exe");
+        string argumentos = "/i \"" + pacote + "\" /qn /norestart INSTALLDIR=\"" + destino + "\"";
+        var inicio = new ProcessStartInfo(msiexec, argumentos) { UseShellExecute = false, CreateNoWindow = true };
+        try {
+            using (var processo = Process.Start(inicio)) {
+                processo.WaitForExit();
+                return processo.ExitCode;
+            }
+        } catch (System.ComponentModel.Win32Exception) {
+            return 1601;
+        }
+    }
+
+    [STAThread] static int Main(string[] args) {
+        if (args.Length == 3 && args[0] == "--instalar") return Instalar(args[1], args[2]);
         string porta = Environment.GetEnvironmentVariable("SIPROQUIM_PORTA");
         string perfil = Environment.GetEnvironmentVariable("SIPROQUIM_PERFIL");
         string versao = Environment.GetEnvironmentVariable("SIPROQUIM_VERSAO");

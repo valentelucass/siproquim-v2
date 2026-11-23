@@ -22,7 +22,9 @@ for (const tema of ["dark", "light"] as const) {
     await instalar.click();
     await expect(modal.getByText("Download interrompido.")).toBeVisible();
     await instalar.click();
-    await expect(modal.getByText(/O instalador foi aberto/)).toBeVisible();
+    await expect(modal.getByText("Atualização instalada", {exact:true})).toBeVisible();
+    await expect(modal.getByText(/Reabrindo o SIPROQUIM/)).toBeVisible();
+    await expect(instalar).toBeDisabled();
     await expect(footer.getByRole("link", {name: /Lucas Andrade/})).toHaveAttribute("href", /linkedin\.com\/in\/dev-lucasandrade/);
   });
 }

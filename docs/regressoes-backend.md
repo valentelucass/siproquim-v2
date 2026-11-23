@@ -41,7 +41,9 @@ A amostra de duas notas de Agudos continua indisponível. Importação internaci
 
 ## Distribuição para Windows
 
-Na entrega da 2.0.3, o GitHub já mostrava a release, mas o aplicativo 2.0.2 ainda recebia o manifesto anterior. A janela também podia aguardar cinco minutos para a próxima consulta. A partir da 2.0.4, a consulta inclui um identificador que evita reaproveitar o redirecionamento anterior. O rodapé pode forçar uma consulta, e a janela visível verifica a cada 30 segundos. O ensaio do canal público consulta e baixa o MSI com o código da versão anterior.
+Na entrega da 2.0.3, o GitHub já mostrava a release, mas o aplicativo 2.0.2 ainda recebia o manifesto anterior. A janela também podia aguardar cinco minutos para a próxima consulta. A partir da 2.0.5, a consulta inclui um identificador que evita reaproveitar o redirecionamento anterior. O rodapé pode forçar uma consulta, e a janela visível verifica a cada 30 segundos. O ensaio do canal público consulta e baixa o MSI com o código da versão anterior.
+
+O fluxo anterior abria o Windows Installer interativo e informava apenas o início. A atualização pela interface agora instala em modo silencioso e espera a conclusão antes de chamar o iniciador. O ensaio `--via-atualizador` baixa um MSI assinado de um canal isolado, confere a versão em execução sem rodar o atalho manualmente e compara o lote e o tema. O teste da janela também verifica o centro ao iniciar e ao restaurar pelo atalho.
 
 Na 2.0.1, concluir uma instalação manual deixava o aplicativo fechado. O ensaio com o Windows Installer reproduziu zero aberturas após a instalação. Na 2.0.2, o MSI chama o iniciador depois de concluir a instalação ou atualização interativa. O ensaio conta uma chamada em cada caso e confere também o reparo, a remoção e a instalação silenciosa.
 
